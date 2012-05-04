@@ -37,3 +37,7 @@ c:AddChannel("level2")
 if c.channels["test:level2"] then print "11: ✔" else print "11: x" end
 
 if c:HasChannel("test:level2") then print "12: ✔" else print "12: x" end
+if not c:HasChannel("derp") then print "13: ✔" else print "13: x" end
+
+if c:ReturnChannel("test:level2") then print "14: ✔" else print "14: x" end
+if not c:ReturnChannel("derp") then print "15: ✔" else print "15: x" end

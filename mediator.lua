@@ -85,6 +85,20 @@ function Channel:HasChannel(namespace)
   return false
 end
 
+function Channel:ReturnChannel(namespace)
+  return self.channels[namespace]
+end
+
+-- function Channel:RemoveSubscriber
+-- function Channel:Publish
+
 function Channel:StopPropagation()
   self.stopped = true
 end
+
+-- oo Mediator
+-- function Mediator:GetChannel
+-- function Mediator:Subscribe
+-- function Mediator:GetSubscriber
+-- function Mediator:Remove
+-- function Mediator:Publish
