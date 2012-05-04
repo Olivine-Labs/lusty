@@ -1,11 +1,11 @@
 local oo = require "loop.simple"
 
-Subscriber = oo.class {
+Subscriber = oo.class({
   options = nil,
   fn = nil,
   context = nil,
   channel = nil
-}
+})
 
 function Subscriber:__init(fn, options, context)
   return oo.rawnew(self, {
@@ -24,12 +24,12 @@ function Subscriber:Update(options)
   end
 end
 
-Channel = oo.class {
+Channel = oo.class({
   namespace = nil,
   stopped = false,
   callbacks = {},
   channels = {}
-}
+})
 
 function Channel:__init(namespace)
   return oo.rawnew(self, {
@@ -42,7 +42,7 @@ function Channel:AddSubscriber(fn, options, context)
   local priority = (#self.callbacks + 1)
 
   if options and options.priority then
-    if options.priority >= 0 and options.priority < (self.callbacks.length + 1) then
+    if options.priority >= 0 and options.priority < (#self.callbacks + 1) then
       priority = options.priority
     end
   end

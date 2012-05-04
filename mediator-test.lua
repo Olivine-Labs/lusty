@@ -3,6 +3,9 @@ dofile("mediator.lua")
 function test()
 end
 
+function test2()
+end
+
 s = Subscriber(test, { stuff = false }, {})
 if(s.options.stuff == false) then print "1: ✔" else print "1: x" end
 
@@ -15,3 +18,9 @@ if(c.namespace == "test") then print "3: ✔" else print "3: x" end
 c:AddSubscriber(test, {}, {})
 if(c.callbacks[1] ~= nil) then print "4: ✔" else print "4: x" end
 if(c.callbacks[1].fn == test) then print "5: ✔" else print "5: x" end
+
+c:AddSubscriber(test2, {}, {})
+if(c.callbacks[2].fn == test2) then print "6: ✔" else print "6: x" end
+
+c:AddSubscriber(test2, { priority = 1 }, {})
+if(c.callbacks[1].fn == test2 and c.callbacks[2].fn == test) then print "7: ✔" else print "7: x" end
