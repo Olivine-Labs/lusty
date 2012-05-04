@@ -1,10 +1,13 @@
 local oo = require "loop.simple"
 
+-- Subscriber class and functions --
+
 Subscriber = oo.class({
   options = nil,
   fn = nil,
   context = nil,
-  channel = nil
+  channel = nil,
+  id = math.random(10000000000)
 })
 
 function Subscriber:__init(fn, options, context)
@@ -23,6 +26,8 @@ function Subscriber:Update(options)
     self.options = options.options or self.options
   end
 end
+
+-- Channel class and functions --
 
 Channel = oo.class({
   namespace = nil,
@@ -48,6 +53,20 @@ function Channel:AddSubscriber(fn, options, context)
   end
 
   table.insert(self.callbacks, priority, callback)
+
+  return callback
+end
+
+function Channel:GetSubscriber(id)
+  for i,v in pairs(self.callbacks) do
+    if v.id == id then return v end
+  end
+ --[[
+  for i,v in pairs(self.channels) do
+    local s = v:GetSubscriber(id)
+    if s then return s end
+  end
+  ]]
 end
 
 function Channel:StopPropagation()
