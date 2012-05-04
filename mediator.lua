@@ -61,12 +61,6 @@ function Channel:GetSubscriber(id)
   for i,v in pairs(self.callbacks) do
     if v.id == id then return { index = i, value = v } end
   end
- --[[
-  for i,v in pairs(self.channels) do
-    local s = v:GetSubscriber(id)
-    if s then return s end
-  end
-  ]]
 end
 
 function Channel:SetPriority(id, priority)
@@ -76,6 +70,19 @@ function Channel:SetPriority(id, priority)
     table.remove(self.callbacks, callback.index)
     table.insert(self.callbacks, priority, callback.value)
   end
+end
+
+function Channel:AddChannel(namespace)
+  if(self.namespace) then
+    namespace = self.namespace..":"..namespace
+  end
+
+  self.channels[namespace] = Channel(namespace)
+end
+
+function Channel:HasChannel(namespace)
+  if self.channels[namespace] then return true end
+  return false
 end
 
 function Channel:StopPropagation()
