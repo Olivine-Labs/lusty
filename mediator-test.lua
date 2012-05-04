@@ -24,3 +24,6 @@ if(c.callbacks[2].fn == test2) then print "6: ✔" else print "6: x" end
 
 c:AddSubscriber(test2, { priority = 1 }, {})
 if(c.callbacks[1].fn == test2 and c.callbacks[2].fn == test) then print "7: ✔" else print "7: x" end
+
+c:StopPropagation()
+if(c.stopped) then print "8: ✔" else print "8: x" end

@@ -49,3 +49,7 @@ function Channel:AddSubscriber(fn, options, context)
 
   table.insert(self.callbacks, priority, callback)
 end
+
+function Channel:StopPropagation()
+  self.stopped = true
+end
