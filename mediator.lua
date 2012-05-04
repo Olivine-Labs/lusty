@@ -7,7 +7,6 @@ Subscriber = oo.class({
   fn = nil,
   context = nil,
   channel = nil,
-  id = math.random(10000000000)
 })
 
 function Subscriber:__init(fn, options, context)
@@ -15,7 +14,8 @@ function Subscriber:__init(fn, options, context)
     options = options,
     fn = fn,
     context = context,
-    channel = nil
+    channel = nil,
+    id = math.random(10000000000)
   })
 end
 
@@ -59,7 +59,7 @@ end
 
 function Channel:GetSubscriber(id)
   for i,v in pairs(self.callbacks) do
-    if v.id == id then return v end
+    if v.id == id then return { index = i, value = v } end
   end
  --[[
   for i,v in pairs(self.channels) do
@@ -67,6 +67,15 @@ function Channel:GetSubscriber(id)
     if s then return s end
   end
   ]]
+end
+
+function Channel:SetPriority(id, priority)
+  callback = self:GetSubscriber(id)
+
+  if callback then
+    table.remove(self.callbacks, callback.index)
+    table.insert(self.callbacks, priority, callback.value)
+  end
 end
 
 function Channel:StopPropagation()

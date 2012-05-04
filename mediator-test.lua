@@ -28,4 +28,7 @@ if(c.callbacks[1].fn == test2 and c.callbacks[2].fn == test) then print "7: ✔"
 c:StopPropagation()
 if(c.stopped) then print "8: ✔" else print "8: x" end
 
-if c:GetSubscriber(sub3.id).id == sub3.id then print "9: ✔" else print "9: x" end 
+if (c:GetSubscriber(sub3.id).value.id == sub3.id) then print "9: ✔" else print "9: x" end 
+
+c:SetPriority(sub2.id, 1)
+if (c.callbacks[1].id == sub2.id) then print "10: ✔" else print "10: x" end 
