@@ -29,7 +29,7 @@ local Object = {
     return '::class::'
   end,
 
-  --Constructor
+  -- Constructor
   __init = function(self)
     local newobject = {
       super = self.super,
