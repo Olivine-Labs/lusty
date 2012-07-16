@@ -119,12 +119,12 @@ function PublishTest()
   local olddata = { test = false }
   local data = { test = true }
 
-  local assertFn = function(channel, data)
+  local assertFn = function(data)
     olddata = data
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
-  c:publish("test", data)
+  c:publish(data)
 
   assert(olddata.test)
 end
@@ -133,14 +133,14 @@ function PublishMultipleArgumentsTest()
   local data = { test = true }
   local arguments
 
-  local assertFn = function(channel, ...)
-    arguments = arg
+  local assertFn = function(data, wat, seven)
+    arguments = { data = data, wat = wat, seven = seven }
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
   c:publish("test", data, "wat", "seven")
 
-  assert(arguments.n == 3)
+  assert(#arguments)
 end
 
 function StopPublishTest()
@@ -148,18 +148,18 @@ function StopPublishTest()
   local data = { test = 1 }
   local data2 = { test = 2 }
 
-  local assertFn = function(channel, data)
+  local assertFn = function(data)
     olddata = data
-    channel:stopPropagation()
+    c:stopPropagation()
   end
 
-  local assertFn2 = function(channel, data)
+  local assertFn2 = function(data)
     olddata = data2
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
   local sub2 = c:addSubscriber(assertFn2, {})
-  c:publish("test",data)
+  c:publish(data)
 
   assert(olddata.test == 1)
 end
@@ -168,7 +168,7 @@ function PublishRecursiveTest()
   local olddata = { test = false }
   local data = { test = true }
 
-  local assertFn = function(channel, data)
+  local assertFn = function(...)
     olddata = data
   end
 
@@ -176,7 +176,7 @@ function PublishRecursiveTest()
 
   local sub1 = c.channels["level2"]:addSubscriber(assertFn, {})
 
-  c:publish("test:level2", data)
+  c:publish(data)
 
   assert(olddata.test)
 end
@@ -210,9 +210,8 @@ end
 
 
 function RemoveSubscriberAtMediatorLevelTest()
-  local assertFn = function(data, channel)
+  local assertFn = function(data)
     olddata = data
-    channel:stopPropagation()
   end
 
   local s = m:subscribe({"test"}, assertFn)
@@ -222,4 +221,17 @@ function RemoveSubscriberAtMediatorLevelTest()
   m:removeSubscriber(s.id, {"test"})
 
   assert_nil(m:getSubscriber(s.id, { "test" }))
+end
+
+function PublishSubscriberAtMediatorLevelTest()
+  local olddata = "wat"
+
+  local assertFn = function(data)
+    olddata = data
+  end
+
+  local s = m:subscribe({"test"}, assertFn)
+  m:publish({"test"}, "hi")
+
+  assert(olddata == "hi")
 end

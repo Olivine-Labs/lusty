@@ -98,16 +98,15 @@ end
 --  return self.namespace
 --end
 
-function Channel:publish(namespace, ...)
+function Channel:publish(...)
   for i,v in pairs(self.callbacks) do
     if self.stopped then return end
 
-    table.insert(arg, 1, self)
     v.fn(unpack(arg))
   end
 
   for i,v in pairs(self.channels) do
-    v:publish(namespace, unpack(arg))
+    v:publish(unpack(arg))
   end
 end
 
@@ -152,7 +151,7 @@ function Mediator:removeSubscriber(id, channelNamespace)
 end
 
 function Mediator:publish(channelNamespace, ...)
-  self:getChannel(channelNamespace).publish(...)
+  self:getChannel(channelNamespace):publish(unpack(arg))
 end
 
 return Mediator, Channel, Subscriber
