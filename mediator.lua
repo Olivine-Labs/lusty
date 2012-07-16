@@ -2,7 +2,7 @@ local oo = require "loop.base"
 
 -- Subscriber class and functions --
 
-Subscriber = oo.class{}
+local Subscriber = oo.class{}
 
 function Subscriber:__init(fn, options)
   return oo.rawnew(self, {
@@ -22,7 +22,7 @@ end
 
 -- Channel class and functions --
 
-Channel = oo.class({
+local Channel = oo.class({
   stopped = false
 })
 
@@ -55,13 +55,13 @@ function Channel:getSubscriber(id)
   end
 
   for i,v in pairs(self.channels) do
-    sub = v:getSubscriber(id)
+    local sub = v:getSubscriber(id)
     if sub then return sub end
   end
 end
 
 function Channel:setPriority(id, priority)
-  callback = self:getSubscriber(id)
+  local callback = self:getSubscriber(id)
 
   if callback.value then
     table.remove(self.callbacks, callback.index)
@@ -70,16 +70,12 @@ function Channel:setPriority(id, priority)
 end
 
 function Channel:addChannel(namespace)
-  if(self.namespace) then
-    namespace = self.namespace..":"..namespace
-  end
-
   self.channels[namespace] = Channel(namespace)
+  return self.channels[namespace]
 end
 
 function Channel:hasChannel(namespace)
-  if self.channels[namespace] then return true end
-  return false
+  return self.channels[namespace] and true
 end
 
 function Channel:getChannel(namespace)
@@ -87,7 +83,7 @@ function Channel:getChannel(namespace)
 end
 
 function Channel:removeSubscriber(id)
-  callback = self:getSubscriber(id)
+  local callback = self:getSubscriber(id)
 
   if callback.value then
     for i,v in pairs(self.channels) do
@@ -98,9 +94,9 @@ function Channel:removeSubscriber(id)
   end
 end
 
-function Channel:__tostring()
-  return self.namespace
-end
+--function Channel:__tostring()
+--  return self.namespace
+--end
 
 function Channel:publish(data)
   for i,v in pairs(self.callbacks) do
@@ -120,24 +116,42 @@ end
 
 -- Mediator class and functions --
 
-Mediator = oo.class{}
+local Mediator = oo.class{}
 
 function Mediator:__init(fn, options)
   return oo.rawnew(self, {
+    channel = Channel('root')
   })
 end
 
-function Mediator:getChannel()
+function Mediator:getChannel(channelNamespace)
+  local channel = self.channel
+
+  for i,v in pairs(channelNamespace) do
+    if not channel:hasChannel(v) then
+      channel = channel:addChannel(v)
+    else
+      channel = channel:getChannel(v)
+    end
+  end
+
+  return channel;
 end
 
-function Mediator:subscribe()
+function Mediator:subscribe(channelNamespace, fn, options)
+  return self:getChannel(channelNamespace):addSubscriber(fn, options)
 end
 
-function Mediator:getSubscriber()
+function Mediator:getSubscriber(id, channelNamespace)
+  return self:getChannel(channelNamespace):getSubscriber(id)
 end
 
-function Mediator:remove()
+function Mediator:removeSubscriber(id, channelNamespace)
+  return self:getChannel(channelNamespace):removeSubscriber(id)
 end
 
-function Mediator:publish()
+function Mediator:publish(channelNamespace, ...)
+  self:getChannel(channelNamespace).publish(...)
 end
+
+return Mediator, Channel, Subscriber

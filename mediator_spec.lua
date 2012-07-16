@@ -1,5 +1,5 @@
 require "lunit"
-dofile("mediator.lua")
+Mediator, Channel, Subsciber = dofile("mediator.lua")
 
 module("mediator_testcase", lunit.testcase, package.seeall)
 
@@ -73,17 +73,17 @@ end
 
 function AddChannelTest()
   c:addChannel("level2")
-  assert_not_nil(c.channels["test:level2"])
+  assert_not_nil(c.channels["level2"])
 end
 
 function HasChannelTest()
   c:addChannel("level2")
-  assert(c:hasChannel("test:level2"))
+  assert(c:hasChannel("level2"))
 end
 
 function GetChannelTest()
   c:addChannel("level2")
-  assert_not_nil(c:getChannel("test:level2"))
+  assert_not_nil(c:getChannel("level2"))
 end
 
 function RemoveSubscriberTest()
@@ -98,7 +98,7 @@ end
 function GetSubscriberInInternalChannelTest()
   c:addChannel("level2")
 
-  local sub1 = c.channels["test:level2"]:addSubscriber(testfn, {})
+  local sub1 = c.channels["level2"]:addSubscriber(testfn, {})
 
   gotten = c:getSubscriber(sub1.id)
 
@@ -108,11 +108,11 @@ end
 function RemoveSubscriberInInternalChannelTest()
   c:addChannel("level2")
 
-  local sub1 = c.channels["test:level2"]:addSubscriber(testfn, {})
+  local sub1 = c.channels["level2"]:addSubscriber(testfn, {})
 
   c:removeSubscriber(sub1.id)
 
-  assert_nil(c.channels["test:level2"]:getSubscriber(sub1.id))
+  assert_nil(c.channels["level2"]:getSubscriber(sub1.id))
 end
 
 function PublishTest()
@@ -160,13 +160,52 @@ function PublishRecursiveTest()
 
   c:addChannel("level2")
 
-  local sub1 = c.channels["test:level2"]:addSubscriber(assertFn, {})
+  local sub1 = c.channels["level2"]:addSubscriber(assertFn, {})
 
   c:publish(data)
 
   assert(olddata.test)
 end
 
-function SubscribeAtMediatorLevelTest()
-  local sub = Mediator.Subscribe("test")
+function GetChannelAtMediatorLevelTest()
+  assert_not_nil(m:getChannel({"test", "level2"}))
+  assert(m:getChannel({"test", "level2"}) == m:getChannel({"test"}):getChannel("level2"))
+end
+
+function PublishAtMediatorLevelTest()
+  local assertFn = function(data, channel)
+    olddata = data
+    channel:stopPropagation()
+  end
+
+  s = m:subscribe({"test"}, assertFn)
+
+  assert_not_nil(m:getChannel({ "test" }):getSubscriber(s.id))
+end
+
+function GetSubscriberAtMediatorLevelTest()
+  local assertFn = function(data, channel)
+    olddata = data
+    channel:stopPropagation()
+  end
+
+  s = m:subscribe({"test"}, assertFn)
+
+  assert_not_nil(m:getSubscriber(s.id, { "test" }))
+end
+
+
+function RemoveSubscriberAtMediatorLevelTest()
+  local assertFn = function(data, channel)
+    olddata = data
+    channel:stopPropagation()
+  end
+
+  s = m:subscribe({"test"}, assertFn)
+
+  assert_not_nil(m:getSubscriber(s.id, { "test" }))
+
+  m:removeSubscriber(s.id, {"test"})
+
+  assert_nil(m:getSubscriber(s.id, { "test" }))
 end
