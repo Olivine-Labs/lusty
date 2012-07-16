@@ -94,19 +94,21 @@ function Channel:removeSubscriber(id)
   end
 end
 
---function Channel:__tostring()
---  return self.namespace
---end
-
-function Channel:publish(...)
+function Channel:publish(channelNamespace, ...)
   for i,v in pairs(self.callbacks) do
     if self.stopped then return end
 
     v.fn(unpack(arg))
   end
 
-  for i,v in pairs(self.channels) do
-    v:publish(unpack(arg))
+  if #channelNamespace > 0 then
+    local nextNamespace = channelNamespace[1]
+    table.remove(channelNamespace, 1)
+    self.channels[nextNamespace]:publish(channelNamespace, unpack(arg))
+  else
+    for i,v in pairs(self.channels) do
+      v:publish({}, unpack(arg))
+    end
   end
 end
 
@@ -151,7 +153,7 @@ function Mediator:removeSubscriber(id, channelNamespace)
 end
 
 function Mediator:publish(channelNamespace, ...)
-  self:getChannel(channelNamespace):publish(unpack(arg))
+  self.channel:publish(channelNamespace, unpack(arg))
 end
 
 return Mediator, Channel, Subscriber

@@ -124,7 +124,7 @@ function PublishTest()
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
-  c:publish(data)
+  c:publish({}, data)
 
   assert(olddata.test)
 end
@@ -138,7 +138,7 @@ function PublishMultipleArgumentsTest()
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
-  c:publish("test", data, "wat", "seven")
+  c:publish({}, "test", data, "wat", "seven")
 
   assert(#arguments)
 end
@@ -159,7 +159,7 @@ function StopPublishTest()
 
   local sub1 = c:addSubscriber(assertFn, {})
   local sub2 = c:addSubscriber(assertFn2, {})
-  c:publish(data)
+  c:publish({}, data)
 
   assert(olddata.test == 1)
 end
@@ -176,7 +176,7 @@ function PublishRecursiveTest()
 
   local sub1 = c.channels["level2"]:addSubscriber(assertFn, {})
 
-  c:publish(data)
+  c:publish({}, data)
 
   assert(olddata.test)
 end
@@ -231,7 +231,30 @@ function PublishSubscriberAtMediatorLevelTest()
   end
 
   local s = m:subscribe({"test"}, assertFn)
-  m:publish({"test"}, "hi")
+  m:publish({ "test" }, "hi")
 
   assert(olddata == "hi")
+end
+
+function PublishSubscriberToCallParentsAtMediatorLevelTest()
+  local olddata = "wat"
+  local olddata2 = "watwat"
+
+  local assertFn = function(data)
+    olddata = data
+  end
+
+  local assertFn2 = function(data)
+    olddata2 = data
+  end
+
+  c:addChannel("level2")
+
+  local s = m:subscribe({"test","level2"}, assertFn)
+  local s2 = m:subscribe({"test"}, assertFn2)
+
+  m:publish({"test"}, "didn't read lol")
+
+  assert(olddata == "didn't read lol")
+  assert(olddata2 == "didn't read lol")
 end
