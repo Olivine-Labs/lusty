@@ -98,15 +98,16 @@ end
 --  return self.namespace
 --end
 
-function Channel:publish(data)
+function Channel:publish(namespace, ...)
   for i,v in pairs(self.callbacks) do
     if self.stopped then return end
 
-    v.fn(data, self)
+    table.insert(arg, 1, self)
+    v.fn(unpack(arg))
   end
 
   for i,v in pairs(self.channels) do
-    v:publish(data)
+    v:publish(namespace, unpack(arg))
   end
 end
 
