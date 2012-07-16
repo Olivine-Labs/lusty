@@ -119,14 +119,28 @@ function PublishTest()
   local olddata = { test = false }
   local data = { test = true }
 
-  local assertFn = function(data)
+  local assertFn = function(channel, data)
     olddata = data
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
-  c:publish(data)
+  c:publish("test", data)
 
   assert(olddata.test)
+end
+
+function PublishMultipleArgumentsTest()
+  local data = { test = true }
+  local arguments
+
+  local assertFn = function(channel, ...)
+    arguments = arg
+  end
+
+  local sub1 = c:addSubscriber(assertFn, {})
+  c:publish("test", data, "wat", "seven")
+
+  assert(arguments.n == 3)
 end
 
 function StopPublishTest()
@@ -134,18 +148,18 @@ function StopPublishTest()
   local data = { test = 1 }
   local data2 = { test = 2 }
 
-  local assertFn = function(data, channel)
+  local assertFn = function(channel, data)
     olddata = data
     channel:stopPropagation()
   end
 
-  local assertFn2 = function(data, channel)
+  local assertFn2 = function(channel, data)
     olddata = data2
   end
 
   local sub1 = c:addSubscriber(assertFn, {})
   local sub2 = c:addSubscriber(assertFn2, {})
-  c:publish(data)
+  c:publish("test",data)
 
   assert(olddata.test == 1)
 end
@@ -154,7 +168,7 @@ function PublishRecursiveTest()
   local olddata = { test = false }
   local data = { test = true }
 
-  local assertFn = function(data)
+  local assertFn = function(channel, data)
     olddata = data
   end
 
@@ -162,11 +176,12 @@ function PublishRecursiveTest()
 
   local sub1 = c.channels["test:level2"]:addSubscriber(assertFn, {})
 
-  c:publish(data)
+  c:publish("test:level2", data)
 
   assert(olddata.test)
 end
 
-function SubscribeAtMediatorLevelTest()
-  local sub = Mediator.Subscribe("test")
+function GetChannelAtMediatorLevelTest()
+  local c = Mediator.GetChannel("test")
+  assert(c)
 end

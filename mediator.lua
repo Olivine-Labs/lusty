@@ -102,15 +102,16 @@ function Channel:__tostring()
   return self.namespace
 end
 
-function Channel:publish(data)
+function Channel:publish(namespace, ...)
   for i,v in pairs(self.callbacks) do
     if self.stopped then return end
 
-    v.fn(data, self)
+    table.insert(arg, 1, self)
+    v.fn(unpack(arg))
   end
 
   for i,v in pairs(self.channels) do
-    v:publish(data)
+    v:publish(namespace, unpack(arg))
   end
 end
 
@@ -124,20 +125,21 @@ Mediator = oo.class{}
 
 function Mediator:__init(fn, options)
   return oo.rawnew(self, {
+    channels = {}
   })
 end
 
-function Mediator:getChannel()
+function Mediator:getChannel(namespace)
 end
 
-function Mediator:subscribe()
+function Mediator:subscribe(namespace, fn, options)
 end
 
-function Mediator:getSubscriber()
+function Mediator:getSubscriber(subscriberId, namespace)
 end
 
-function Mediator:remove()
+function Mediator:remove(namespace, subscriberId)
 end
 
-function Mediator:publish()
+function Mediator:publish(namespace, ...)
 end
