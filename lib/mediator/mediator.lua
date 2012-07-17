@@ -5,7 +5,7 @@ function Subscriber(fn, options)
     options = options,
     fn = fn,
     channel = nil,
-    id = math.random(10000000000), -- sounds reasonable, rite?
+    id = math.random(1000000000), -- sounds reasonable, rite?
     update = function(self,options)
       if options then
         self.fn = options.fn or self.fn
@@ -109,42 +109,46 @@ end
 
 -- Mediator class and functions --
 
-local Mediator = {}
+local Mediator = setmetatable(
+{
+  Channel = Channel,
+  Subscriber=Subscriber,
+},
+{
+  __call=function (fn, options)
+    return {
+      channel = Channel('root'),
 
-function Mediator(fn, options)
-  return {
-    channel = Channel('root'),
+      getChannel = function(self,channelNamespace)
+        local channel = self.channel
 
-    getChannel = function(self,channelNamespace)
-      local channel = self.channel
-
-      for i,v in pairs(channelNamespace) do
-        if not channel:hasChannel(v) then
-          channel = channel:addChannel(v)
-        else
-          channel = channel:getChannel(v)
+        for i,v in pairs(channelNamespace) do
+          if not channel:hasChannel(v) then
+            channel = channel:addChannel(v)
+          else
+            channel = channel:getChannel(v)
+          end
         end
+
+        return channel;
+      end,
+
+      subscribe = function(self,channelNamespace, fn, options)
+        return self:getChannel(channelNamespace):addSubscriber(fn, options)
+      end,
+
+      getSubscriber = function(self,id, channelNamespace)
+        return self:getChannel(channelNamespace):getSubscriber(id)
+      end,
+
+      removeSubscriber = function(self,id, channelNamespace)
+        return self:getChannel(channelNamespace):removeSubscriber(id)
+      end,
+
+      publish = function(self,channelNamespace, ...)
+        self.channel:publish(channelNamespace, unpack(arg))
       end
-
-      return channel;
-    end,
-
-    subscribe = function(self,channelNamespace, fn, options)
-      return self:getChannel(channelNamespace):addSubscriber(fn, options)
-    end,
-
-    getSubscriber = function(self,id, channelNamespace)
-      return self:getChannel(channelNamespace):getSubscriber(id)
-    end,
-
-    removeSubscriber = function(self,id, channelNamespace)
-      return self:getChannel(channelNamespace):removeSubscriber(id)
-    end,
-
-    publish = function(self,channelNamespace, ...)
-      self.channel:publish(channelNamespace, unpack(arg))
-    end
-  }
-end
-
-return Mediator, Channel, Subscriber
+    }
+  end
+})
+return Mediator
