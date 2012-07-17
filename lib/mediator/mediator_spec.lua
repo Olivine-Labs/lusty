@@ -1,4 +1,4 @@
-package.path = package.path .. ';./?.lua'
+package.path = './?.lua;'..package.path
 
 Mediator = require 'mediator'
 

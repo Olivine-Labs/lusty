@@ -1,8 +1,8 @@
+package.path = '../../src/?.lua;../../lib/?.lua;'..package.path
+local Object = require 'object'
+
 require 'lunit'
 module('lusty.test.lua.object', lunit.testcase, package.seeall)
-
-local Object = require 'lusty.object'
-
 function test_inheritance()
   local Child = Object:extend()
   local GrandChild = Child:extend()
