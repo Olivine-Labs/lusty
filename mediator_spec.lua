@@ -1,5 +1,8 @@
+package.path = './?.lua;'..package.path
+
+Mediator = require 'mediator'
+
 require "lunit"
-Mediator, Channel, Subsciber = dofile("mediator.lua")
 
 module("mediator_testcase", lunit.testcase, package.seeall)
 
@@ -7,7 +10,7 @@ local c, testfn, testfn2, testfn3
 
 function setup()
   m = Mediator()
-  c = Channel("test")
+  c = Mediator.Channel("test")
   testfn = function() end
   testfn2 = function() end
   testfn3 = function() end
