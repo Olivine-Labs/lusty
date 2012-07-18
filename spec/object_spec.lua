@@ -1,4 +1,4 @@
-package.path = '../../src/?.lua;../../lib/?.lua;'..package.path
+package.path = '../src/?.lua;../lib/?.lua;'..package.path
 local Object = require 'object'
 
 require 'lunit'
