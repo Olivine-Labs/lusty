@@ -1,0 +1,5 @@
+table.insert(publishers, "input")
+table.insert(publishers, "prerequest")
+table.insert(publishers, "request")
+table.insert(publishers, "postrequest")
+table.insert(publishers, "output")
