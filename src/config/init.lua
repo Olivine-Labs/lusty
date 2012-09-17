@@ -1,3 +1,3 @@
 return function(Lusty)
-  Lusty.doConfig('publishers')
+  Lusty.doConfig('publishers.lua')
 end
