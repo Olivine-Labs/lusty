@@ -6,7 +6,7 @@ return setmetatable({
   doConfig = function(self, file)
     local f,e = loadfile(file)
     if not f then error(e, 2) end
-    setfenv(f, self)
+    setfenv(f, self)()
   end,
   configure = function(self, path)
     require(path.."/init.lua")(self)
