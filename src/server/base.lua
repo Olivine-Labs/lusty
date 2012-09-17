@@ -4,4 +4,8 @@ return {
     headers = {},
     body = ''
   },
+  response = {
+    headers = {},
+    body = ''
+  }
 }

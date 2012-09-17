@@ -1,23 +1,27 @@
-package.path = './?.lua;../lib/?.lua;'..package.path
-
-local Lusty = {
-  Object = require('object'),
-  event = require('mediator.mediator')(),
-  server = require('server.base'), --base server stub, overridden by config
-  request = function(path, headers, body)
-    --TODO:: creates and processes a new request context
+return setmetatable({
+  --Lusty
+  event   = require 'mediator'(),
+  server  = require 'lusty.server.base', --base server stub, overridden by config
+  configure = function(self, path)
+    --TODO : include all lua files in path
+  end,
+  process = function(self, context)
+    self.event:publish('input',       context)
+    self.event:publish('prerequest',  context)
+    self.event:publish('request',     context)
+    self.event:publish('postrequest', context)
+    self.event:publish('output',      context)
   end
-}
-
-return setmetatable(Lusty,
+},
 {
-  __call = function()
-    --TODO:: includes config files which set up event handlers
-    --and fires initial request event
-    self.request(
-      self.server.request.path,
-      self.server.request.headers,
-      self.server.request.body
-    )
+  --Lusty Meta-Table
+  __call = function(self, path)
+    self.configure(path or 'config'),
+    local context = {
+      lusty = self,
+      request = self.server.request,
+      response = self.server.response
+    }
+    self:process(context)
   end
 })
