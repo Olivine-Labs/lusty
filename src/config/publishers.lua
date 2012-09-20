@@ -1,5 +1,5 @@
-table.insert(publishers, "input")
-table.insert(publishers, "prerequest")
-table.insert(publishers, "request")
-table.insert(publishers, "postrequest")
-table.insert(publishers, "output")
+publishers[1] = "input"
+publishers[2] = "prerequest"
+publishers[3] = "request"
+publishers[4] = "postrequest"
+publishers[5] = "output"
