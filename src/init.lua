@@ -6,7 +6,7 @@ return setmetatable({
   path        = 'config',
 
   --Run config file with lusty as context
-  doConfig = function(self, file)
+  configure = function(self, file)
     if not file then
       file = self
       self = getfenv(2)
@@ -14,11 +14,6 @@ return setmetatable({
     local f,e = loadfile(self.path..'/'..file)
     if not f then error(e, 2) end
     setfenv(f, self)()
-  end,
-
-  --execute initial config file
-  configure = function(self)
-    self:doConfig('init.lua')
   end,
 
   --Publish events

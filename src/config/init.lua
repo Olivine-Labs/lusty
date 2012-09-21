@@ -1,1 +1,1 @@
-doConfig('publishers.lua')
+configure('publishers.lua')
