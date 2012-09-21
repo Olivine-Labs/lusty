@@ -18,7 +18,6 @@ return setmetatable({
 
   --Publish events
   process = function(self, context)
-    print(#self.publishers)
     self.event:publish(self.publishers, context)
   end
 },
