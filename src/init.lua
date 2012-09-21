@@ -2,6 +2,7 @@ return setmetatable({
   --Lusty
   event       = require 'mediator'(),
   publishers  = {},
+  subscribers = {},
   server      = require 'server.base', --base server stub, overridden by config
   path        = 'config',
 
@@ -20,6 +21,12 @@ return setmetatable({
 
   --Publish events
   process = function(self, context)
+    for channel, s in pairs(self.subscribers) do
+      for _,v in pairs(s) do
+        local subscriber = require(v)
+        self.event:subscribe({channel}, subscriber.handler, subscriber.options)
+      end
+    end
     for _,v in pairs(self.publishers) do
       local channel = {}
       table.insert(channel, v)

@@ -1,5 +1,7 @@
-publishers[1] = "input"
-publishers[2] = "prerequest"
-publishers[3] = "request"
-publishers[4] = "postrequest"
-publishers[5] = "output"
+publishers = {
+  "input",
+  "prerequest",
+  "request",
+  "postrequest",
+  "output"
+}
