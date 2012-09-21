@@ -7,9 +7,11 @@ return setmetatable({
 
   --Run config file with lusty as context
   configure = function(self, file)
-    if not file then
+    if not file and type(self) == "string" then
       file = self
       self = getfenv(2)
+    elseif not file then
+      file = 'init.lua'
     end
     local f,e = loadfile(self.path..'/'..file)
     if not f then error(e, 2) end
@@ -18,7 +20,11 @@ return setmetatable({
 
   --Publish events
   process = function(self, context)
-    self.event:publish(self.publishers, context)
+    for _,v in pairs(self.publishers) do
+      local channel = {}
+      table.insert(channel, v)
+      self.event:publish(channel, context)
+    end
   end
 },
 {
