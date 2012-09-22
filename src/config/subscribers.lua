@@ -1,3 +1,6 @@
 subscribers.output = {
-  'event.output.eventdebug'
+  'event.output.json'
+}
+subscribers.input = {
+  'event.input.json'
 }

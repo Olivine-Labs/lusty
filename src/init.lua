@@ -3,33 +3,43 @@ return setmetatable({
   event       = require 'mediator'(),
   publishers  = {},
   subscribers = {},
+  options     = require 'say',
   server      = require 'server.base', --base server stub, overridden by config
   path        = 'config',
 
   --Run config file with lusty as context
   configure = function(self, file)
-    if not file and type(self) == "string" then
+    if type(self) == "string" then
       file = self
-      self = getfenv(2)
-    elseif not file then
-      file = 'init.lua'
+      self = nil
     end
-    local f,e = loadfile(self.path..'/'..file)
-    if not f then error(e, 2) end
+    if not self then self = getfenv(2) end
+    file = file or 'init'
+    local f = package.loaders[2](self.path..'/'..file)
+    if type(f) == "string" then error(f, 2) end
     setfenv(f, self)()
   end,
 
   --Publish events
   process = function(self, context)
-    for channel, s in pairs(self.subscribers) do
-      for _,v in pairs(s) do
-        local subscriber = require(v)
-        self.event:subscribe({channel}, subscriber.handler, subscriber.options)
+    local subscribe = function(channel, list)
+      for _,mod in pairs(list) do
+        if type(mod) == "string" then
+          local subscriber = require(mod)
+          self.event:subscribe(channel, subscriber.handler, subscriber.options)
+        end
       end
     end
-    for _,v in pairs(self.publishers) do
-      local channel = {}
-      table.insert(channel, v)
+
+    for _,channel in pairs(self.publishers) do
+      local list = self.subscribers
+      local currentNamespace = {}
+      for _,namespace in pairs(channel) do
+        list = list[namespace]
+        if not list then break end
+        table.insert(currentNamespace, namespace)
+        subscribe(currentNamespace, list)
+      end
       self.event:publish(channel, context)
     end
   end
@@ -38,12 +48,17 @@ return setmetatable({
   --Lusty Meta-Table
   __call = function(self, path)
     self.path = path or self.path
-    self:configure()
+
+    self:configure('subscribers')
+    self:configure('publishers')
+
     local context = {
       lusty     = self,
       request   = self.server.request,
-      response  = self.server.response
+      response  = self.server.response,
+      data      = {}
     }
     self:process(context)
+    return context
   end
 })

@@ -1,5 +1,5 @@
 local response = {
-  Headers = {},
-  Body = {}
+  headers = {},
+  body = {}
 }
 return response

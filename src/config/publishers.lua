@@ -1,7 +1,7 @@
 publishers = {
-  "input",
-  "prerequest",
-  "request",
-  "postrequest",
-  "output"
+  {"input"},
+  {"prerequest"},
+  {"request"},
+  {"postrequest"},
+  {"output"}
 }
