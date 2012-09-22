@@ -6,6 +6,7 @@ return setmetatable({
   options     = require 'say',
   server      = require 'server.base', --base server stub, overridden by config
   path        = 'config',
+  loaded      = {},
 
   --Run config file with lusty as context
   configure = function(self, file)
@@ -20,7 +21,7 @@ return setmetatable({
     setfenv(f, self)()
   end,
 
-  --Publish events
+  --Publish events, lazily load subscribers
   process = function(self, context)
     local subscribe = function(channel, list)
       for _,mod in pairs(list) do
@@ -34,11 +35,16 @@ return setmetatable({
     for _,channel in pairs(self.publishers) do
       local list = self.subscribers
       local currentNamespace = {}
+      local loaded = self.loaded
       for _,namespace in pairs(channel) do
         list = list[namespace]
         if not list then break end
         table.insert(currentNamespace, namespace)
-        subscribe(currentNamespace, list)
+        if not loaded[namespace] then
+          subscribe(currentNamespace, list)
+          loaded[namespace] = {}
+        end
+        loaded = loaded[namespace]
       end
       self.event:publish(channel, context)
     end
