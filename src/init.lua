@@ -26,6 +26,7 @@ return setmetatable({
 
   --Lazily load subscribers on publish
   publish = function(self, channel, context)
+    --loads and registers a subscriber
     local subscribe = function(channel, list)
       for _,mod in pairs(list) do
         if type(mod) == "string" then
@@ -37,6 +38,7 @@ return setmetatable({
 
     local list = self.subscribers
     local currentNamespace = {}
+    --used to store a record of loaded namespaces
     local loaded = self.loaded
     for _,namespace in pairs(channel) do
       list = list[namespace]
@@ -79,6 +81,10 @@ return setmetatable({
       data      = {}
     }
     self:process(context)
+    --sets say back to defaults, for other libraries that might use it.
+    self.options:set_fallback('en')
+    self.options:set_namespace('en')
+
     return context
   end
 })
