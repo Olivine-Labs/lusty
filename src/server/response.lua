@@ -1,5 +1,6 @@
 local response = {
   headers = {},
-  body = {}
+  body = "",
+  status = 404
 }
 return response

@@ -1,1 +1,1 @@
-server = 'base'
+server = 'stub'

@@ -1,5 +1,6 @@
 return {
   handler = function(context)
+    context.response.headers["content-type"] = "application/json"
     local json = require 'dkjson'
     context.response.body = json.encode(context.data)
   end,

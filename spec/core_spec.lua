@@ -4,6 +4,6 @@ describe("Lusty core test", function()
   local lusty = require 'init'
 
   it("Tests instantiation", function()
-    lusty()
+    lusty('config_stub')
   end)
 end)

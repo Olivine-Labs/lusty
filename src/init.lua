@@ -4,7 +4,7 @@ return setmetatable({
   publishers  = {},
   subscribers = {},
   options     = require 'say',
-  server      = require 'server.base', --base server stub, overridden by config
+  server      = 'base', --base server stub, overridden by config
   path        = 'config',
   loaded      = {},
 
@@ -15,10 +15,11 @@ return setmetatable({
       self = nil
     end
     if not self then self = getfenv(2) end
-    file = file or 'init'
     local f = package.loaders[2](self.path..'/'..file)
     if type(f) == "string" then error(f, 2) end
+    self.options:set_namespace(file)
     setfenv(f, self)()
+    self.options:set_namespace('lusty')
   end,
 
   --Publish events, lazily load subscribers
@@ -55,8 +56,14 @@ return setmetatable({
   __call = function(self, path)
     self.path = path or self.path
 
+    self.options:set_fallback('lusty')
+    self.options:set_namespace('lusty')
+
+    self:configure('lusty')
     self:configure('subscribers')
     self:configure('publishers')
+
+    self.server = require('server.'..self.server)
 
     local context = {
       lusty     = self,
