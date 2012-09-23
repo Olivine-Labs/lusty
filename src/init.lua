@@ -8,6 +8,8 @@ return setmetatable({
   path        = 'config',
   loaded      = {},
 
+  log         = require 'log',
+
   --Run config file with lusty as context
   configure = function(self, file)
     if type(self) == "string" then
@@ -22,8 +24,8 @@ return setmetatable({
     self.options:set_namespace('lusty')
   end,
 
-  --Publish events, lazily load subscribers
-  process = function(self, context)
+  --Lazily load subscribers on publish
+  publish = function(self, channel, context)
     local subscribe = function(channel, list)
       for _,mod in pairs(list) do
         if type(mod) == "string" then
@@ -33,21 +35,26 @@ return setmetatable({
       end
     end
 
-    for _,channel in pairs(self.publishers) do
-      local list = self.subscribers
-      local currentNamespace = {}
-      local loaded = self.loaded
-      for _,namespace in pairs(channel) do
-        list = list[namespace]
-        if not list then break end
-        table.insert(currentNamespace, namespace)
-        if not loaded[namespace] then
-          subscribe(currentNamespace, list)
-          loaded[namespace] = {}
-        end
-        loaded = loaded[namespace]
+    local list = self.subscribers
+    local currentNamespace = {}
+    local loaded = self.loaded
+    for _,namespace in pairs(channel) do
+      list = list[namespace]
+      if not list then break end
+      table.insert(currentNamespace, namespace)
+      if not loaded[namespace] then
+        subscribe(currentNamespace, list)
+        loaded[namespace] = {}
       end
-      self.event:publish(channel, context)
+      loaded = loaded[namespace]
+    end
+    self.event:publish(channel, context)
+  end,
+
+  --Publish events
+  process = function(self, context)
+    for _,channel in pairs(self.publishers) do
+      self:publish(channel, context)
     end
   end
 },
