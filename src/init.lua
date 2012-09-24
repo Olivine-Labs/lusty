@@ -61,9 +61,6 @@ return setmetatable({
     self.config.options:set_namespace('lusty')
 
     self.config('lusty')
-    self.config('subscribers')
-    self.config('publishers')
-    self.config('interfaces')
 
     self.server = require('server.'..self.config.server)
 
