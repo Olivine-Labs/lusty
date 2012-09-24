@@ -1,9 +1,11 @@
-subscribers.output = {
-  'event.output.json'
-}
-subscribers.input = {
-  'event.input.json'
-}
-subscribers.log = {
-  'event.log.console'
+subscribers = {
+  output = {
+    'event.output.json'
+  },
+  input = {
+    'event.input.json'
+  },
+  log = {
+    'event.log.console'
+  }
 }
