@@ -5,32 +5,37 @@ return setmetatable({
   server      = {},
   loaded      = {},
 
-  --Lazily load subscribers on publish
+  --publish with lazy load of subscribers
   publish = function(self, channel, context)
-    --loads and registers a subscriber
-    local subscribe = function(channel, list)
-      for _,mod in pairs(list) do
-        if type(mod) == "string" then
-          local subscriber = require(mod)
-          self.event:subscribe(channel, subscriber.handler, subscriber.options)
+    --only loads subscribers for parent channels of channel
+    local function lazyLoad(self, channel)
+      --loads and registers a subscriber
+      local function subscribe(channel, list)
+        for _,mod in pairs(list) do
+          if type(mod) == "string" then
+            local subscriber = require(mod)
+            self.event:subscribe(channel, subscriber.handler, subscriber.options)
+          end
         end
       end
-    end
 
-    local list = self.config.subscribers
-    local currentNamespace = {}
-    --used to store a record of loaded namespaces
-    local loaded = self.loaded
-    for _,namespace in pairs(channel) do
-      list = list[namespace]
-      if not list then break end
-      table.insert(currentNamespace, namespace)
-      if not loaded[namespace] then
-        subscribe(currentNamespace, list)
-        loaded[namespace] = {}
+      local list = self.config.subscribers
+      local currentNamespace = {}
+      --used to store a record of loaded namespaces
+      local loaded = self.loaded
+      for _,namespace in pairs(channel) do
+        list = list[namespace]
+        if not list then break end
+        table.insert(currentNamespace, namespace)
+        if not loaded[namespace] then
+          subscribe(currentNamespace, list)
+          loaded[namespace] = {}
+        end
+        loaded = loaded[namespace]
       end
-      loaded = loaded[namespace]
     end
+    --Lazily load subscribers for affected channels, then publish event
+    lazyLoad(self, channel)
     self.event:publish(channel, context)
   end,
 
@@ -67,7 +72,7 @@ return setmetatable({
       response  = self.server.response,
       --data work table.
       --Used to manipulate response data before output
-      data      = {}, 
+      data      = {}
     }
 
     --load interfaces, they set themselves up on context
