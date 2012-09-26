@@ -5,5 +5,6 @@ describe("Lusty core test", function()
 
   it("Tests instantiation", function()
     lusty('config_stub')
+    assert.are.equal(200, lusty.server.response.status)
   end)
 end)

@@ -1,11 +1,15 @@
+--{ event handler, config file }
 subscribers = {
-  output = {
-    'event.output.json'
-  },
   input = {
     'event.input.json'
   },
+  request = {
+    {'event.request.file', 'requests.root'}
+  },
+  output = {
+    'event.output.json'
+  },
   log = {
-    'event.log.console'
+    {'event.log.console', 'log'}
   }
 }

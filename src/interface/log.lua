@@ -8,3 +8,4 @@ context.log = function(message, level)
     level = level
   })
 end
+lusty.config.log = context.log

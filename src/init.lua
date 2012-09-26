@@ -11,10 +11,24 @@ return setmetatable({
     local function lazyLoad(self, channel)
       --loads and registers a subscriber
       local function subscribe(channel, list)
-        for _,mod in pairs(list) do
-          if type(mod) == "string" then
-            local subscriber = require(mod)
-            self.event:subscribe(channel, subscriber.handler, subscriber.options)
+        for key,mod in pairs(list) do
+          if type(key) ~= "string" then
+            local subscriberName, configName = false, false
+            if type(mod) == "table" then
+              subscriberName = mod[1]
+              if #mod > 1 then configName = mod[2] end
+            elseif type(mod) == "string" then
+              subscriberName = mod
+            end
+            local subscriber = require(subscriberName)
+            if configName then self.config(configName) end
+            local options = self.config.options
+            local composed = function(context)
+              options:set_namespace(configName or table.concat(channel, '.'))
+              subscriber.handler(context)
+              options:set_namespace('lusty')
+            end
+            self.event:subscribe(channel, composed, subscriber.options)
           end
         end
       end
