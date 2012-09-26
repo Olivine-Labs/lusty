@@ -53,17 +53,15 @@ return setmetatable({
     end
     --Lazily load subscribers for affected channels, then publish event
     lazyLoad(self, channel)
-    if channel[1] == "request" then
-      local split = function(str, sep)
-        local sep, fields = sep or ":", {}
-        local pattern = string.format("([^%s]+)", sep)
-        str:gsub(pattern, function(c) fields[#fields+1] = c end)
-        return fields
-      end
-      table.insert(channel, context.request.headers.method)
-      for _, v in pairs(split(context.request.url, '/')) do
-        table.insert(channel, v)
-      end
+    local split = function(str, sep)
+      local sep, fields = sep or ":", {}
+      local pattern = string.format("([^%s]+)", sep)
+      str:gsub(pattern, function(c) fields[#fields+1] = c end)
+      return fields
+    end
+    table.insert(channel, context.request.headers.method)
+    for _, v in pairs(split(context.request.url, '/')) do
+      table.insert(channel, v)
     end
     self.event:publish(channel, context)
   end,
