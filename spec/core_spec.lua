@@ -6,6 +6,9 @@ describe("Lusty core test", function()
     options = {
       ["config.requests.root"] = {
         file = 'config.handlers.root'
+      },
+      ['log'] = {
+        level = "debug"
       }
     },
     server = 'stub',
