@@ -1,1 +1,1 @@
-options:set('file', 'handlers.root')
+options:set('file', 'config.handlers.root')

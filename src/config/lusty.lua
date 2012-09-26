@@ -1,4 +1,4 @@
-server = 'nginx'
+server = 'stub'
 
 config('subscribers')
 config('publishers')

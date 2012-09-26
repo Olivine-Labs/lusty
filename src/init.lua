@@ -5,6 +5,17 @@ return setmetatable({
   server      = {},
   loaded      = {},
 
+  subscribe = function(self, channel, subscriberName, configName)
+    local subscriber = package.loaders[2](subscriberName)(self, configName)
+    local options = self.config.options
+    local composedHandler = function(context)
+      options:set_namespace(configName or table.concat(channel, '.'))
+      subscriber.handler(context)
+      options:set_namespace('lusty')
+    end
+    self.event:subscribe(channel, composedHandler, subscriber.options)
+  end,
+
   --publish with lazy load of subscribers
   publish = function(self, channel, context)
     --only loads subscribers for parent channels of channel
@@ -20,15 +31,7 @@ return setmetatable({
             elseif type(mod) == "string" then
               subscriberName = mod
             end
-            local subscriber = require(subscriberName)
-            if configName then self.config(configName) end
-            local options = self.config.options
-            local composed = function(context)
-              options:set_namespace(configName or table.concat(channel, '.'))
-              subscriber.handler(context)
-              options:set_namespace('lusty')
-            end
-            self.event:subscribe(channel, composed, subscriber.options)
+            self:subscribe(channel, subscriberName, configName)
           end
         end
       end
@@ -64,15 +67,29 @@ return setmetatable({
     for _,v in pairs(self.config.interfaces) do
       package.loaders[2]('interface.'..v)(self, context)
     end
+  end,
+  --Add options to say
+  processOptions = function(self, context)
+    local options = self.config.options
+    self.config.options = require 'say'
+    self.config.options:set_fallback('lusty')
+    for namespace, set in pairs(options) do
+      self.config.options:set_namespace(namespace)
+      for key, value in pairs(set) do
+        self.config.options:set(key, value)
+      end
+    end
+    self.config.options:set_namespace('lusty')
   end
 },
 {
   --Lusty Meta-Table
   __call = function(self, path)
-    self.config.path = path or self.config.path
-
-    self.config.options:set_fallback('lusty')
-    self.config.options:set_namespace('lusty')
+    if type(path) == "string" then
+      self.config.path = path or self.config.path
+    else
+      self.config = setmetatable(path, getmetatable(self.config))
+    end
 
     self.config('lusty')
 
@@ -85,6 +102,8 @@ return setmetatable({
       --Used to manipulate response data before output
       data      = {}
     }
+    --load options
+    self:processOptions(context)
 
     --load interfaces, they set themselves up on context
     self:processInterfaces(context)

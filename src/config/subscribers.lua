@@ -10,6 +10,6 @@ subscribers = {
     'event.output.json'
   },
   log = {
-    {'event.log.console', 'log'}
+    'event.log.console'
   }
 }

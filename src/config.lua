@@ -3,12 +3,15 @@ local config = function(self, file)
     file = self
     self = nil
   end
+
   if not self then self = getfenv(2) end
-  local f = package.loaders[2](self.path..'/'..file)
-  if type(f) == "string" then error(f, 2) end
-  self.options:set_namespace(file)
-  setfenv(f, self)()
-  self.options:set_namespace('lusty')
+  if self.path then
+    local f = package.loaders[2](self.path..'/'..file)
+    if type(f) == "string" then error(f, 2) end
+    self.options:set_namespace(file)
+    setfenv(f, self)()
+    self.options:set_namespace('lusty')
+  end
 end
 
 return setmetatable({
@@ -16,7 +19,7 @@ return setmetatable({
   publishers  = {},
   subscribers = {},
   interfaces  = {},
-  server      = 'base',
+  server      = 'stub',
   path        = 'config',
   config      = config
 },

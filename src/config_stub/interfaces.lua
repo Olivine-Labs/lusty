@@ -1,5 +1,0 @@
-interfaces = {
-  'options',
-  'log',
-  'publish'
-}
