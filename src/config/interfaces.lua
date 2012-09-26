@@ -1,5 +1,4 @@
 interfaces = {
   'options',
-  'log',
-  'publish'
+  'log'
 }

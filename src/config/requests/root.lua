@@ -1,1 +1,3 @@
-options:set('file', 'config.handlers.root')
+options.['requests.root'] = {
+  file = 'config.handlers.root'
+}

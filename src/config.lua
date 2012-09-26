@@ -8,14 +8,12 @@ local config = function(self, file)
   if self.path then
     local f = package.loaders[2](self.path..'/'..file)
     if type(f) == "string" then error(f, 2) end
-    self.options:set_namespace(file)
     setfenv(f, self)()
-    self.options:set_namespace('lusty')
   end
 end
 
 return setmetatable({
-  options     = require 'say',
+  options     = {},
   publishers  = {},
   subscribers = {},
   interfaces  = {},

@@ -1,1 +1,3 @@
-options:set('level', 'debug')
+options.log = {
+  level = 'debug'
+}

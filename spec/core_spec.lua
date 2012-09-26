@@ -32,8 +32,7 @@ describe("Lusty core test", function()
     },
     interfaces = {
       'options',
-      'log',
-      'publish'
+      'log'
     }
   }
 

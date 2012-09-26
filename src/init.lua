@@ -1,17 +1,17 @@
 return setmetatable({
   --Lusty
-  event       = require 'mediator'(),
-  config      = require 'config',
-  server      = {},
-  loaded      = {},
+  event             = require 'mediator'(),
+  config            = require 'config',
+  server            = {},
+  loaded            = {},
+  current_namespace = 'lusty',
 
   subscribe = function(self, channel, subscriberName, configName)
     local subscriber = package.loaders[2](subscriberName)(self, configName)
-    local options = self.config.options
     local composedHandler = function(context)
-      options:set_namespace(configName or table.concat(channel, '.'))
+      self.current_namespace = configName or table.concat(channel, '.')
       subscriber.handler(context)
-      options:set_namespace('lusty')
+      self.current_namespace = 'lusty'
     end
     self.event:subscribe(channel, composedHandler, subscriber.options)
   end,
@@ -67,19 +67,6 @@ return setmetatable({
     for _,v in pairs(self.config.interfaces) do
       package.loaders[2]('interface.'..v)(self, context)
     end
-  end,
-  --Add options to say
-  processOptions = function(self, context)
-    local options = self.config.options
-    self.config.options = require 'say'
-    self.config.options:set_fallback('lusty')
-    for namespace, set in pairs(options) do
-      self.config.options:set_namespace(namespace)
-      for key, value in pairs(set) do
-        self.config.options:set(key, value)
-      end
-    end
-    self.config.options:set_namespace('lusty')
   end
 },
 {
@@ -102,18 +89,12 @@ return setmetatable({
       --Used to manipulate response data before output
       data      = {}
     }
-    --load options
-    self:processOptions(context)
 
     --load interfaces, they set themselves up on context
     self:processInterfaces(context)
 
     --Do events, publish with context
     self:processPublishers(context)
-
-    --sets say back to defaults, for other libraries that might use it.
-    self.config.options:set_fallback('en')
-    self.config.options:set_namespace('en')
 
     return context
   end
