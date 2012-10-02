@@ -1,2 +1,1 @@
-options.store = {
-}
+store = {}

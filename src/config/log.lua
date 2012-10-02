@@ -1,3 +1,3 @@
-options.log = {
+log = {
   level = 'debug'
 }

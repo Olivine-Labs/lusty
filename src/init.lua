@@ -72,11 +72,13 @@ return setmetatable({
       self:publish(channel, context)
     end
   end,
-  --Add interfaces to context
-  processInterfaces = function(self, context)
-    for _,v in pairs(self.config.interfaces) do
-      package.loaders[2]('interface.'..v)(self, context)
+  --Add data to context
+  buildContext = function(self)
+    local context = {}
+    for _,v in pairs(self.config.context) do
+      package.loaders[2]('context.'..v)(self, context)
     end
+    return context
   end
 },
 {
@@ -92,16 +94,7 @@ return setmetatable({
 
     self.server = require('server.'..self.config.server)
 
-    local context = {
-      request   = self.server.request,
-      response  = self.server.response,
-      --data work table.
-      --Used to manipulate response data before output
-      data      = {}
-    }
-
-    --load interfaces, they set themselves up on context
-    self:processInterfaces(context)
+    local context = self:buildContext()
 
     --Do events, publish with context
     self:processPublishers(context)

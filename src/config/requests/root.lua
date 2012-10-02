@@ -1,3 +1,3 @@
-options.['requests.root'] = {
+['requests.root'] = {
   file = 'config.handlers.root'
 }

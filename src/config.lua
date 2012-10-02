@@ -13,10 +13,9 @@ local config = function(self, file)
 end
 
 return setmetatable({
-  options     = {},
   publishers  = {},
   subscribers = {},
-  interfaces  = {},
+  context     = {},
   server      = 'stub',
   path        = 'config',
   config      = config

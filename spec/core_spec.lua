@@ -3,13 +3,11 @@ package.path = '../src/?.lua;'..package.path
 describe("Lusty core test", function()
   local lusty = require 'init'
   local config = {
-    options = {
-      ["config.requests.root"] = {
-        file = 'config.handlers.root'
-      },
-      ['log'] = {
-        level = "debug"
-      }
+    ["config.requests.root"] = {
+      file = 'config.handlers.root'
+    },
+    log = {
+      level = "debug"
     },
     server = 'stub',
     subscribers = {
@@ -33,9 +31,11 @@ describe("Lusty core test", function()
       {"postrequest"},
       {"output"}
     },
-    interfaces = {
+    context = {
+      'lusty',
       'options',
-      'log'
+      'log',
+      'store'
     }
   }
 
