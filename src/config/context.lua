@@ -1,4 +1,5 @@
-interfaces = {
+context = {
+  'lusty',
   'options',
   'log',
   'store'
