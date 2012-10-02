@@ -1,5 +1,5 @@
 server = 'stub'
 
-config('subscribers')
-config('publishers')
-config('interfaces')
+config 'subscribers'
+config 'publishers'
+config 'interfaces'
