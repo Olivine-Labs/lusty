@@ -5,7 +5,7 @@ local store = function(method)
   return function(collection, query, data)
     lusty:publish(
       {'store', method, collection},
-      data and {query = query, data = data} or {data = query}
+      {query = query, data = data}
     )
   end
 end
