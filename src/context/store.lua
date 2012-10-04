@@ -2,8 +2,11 @@ local lusty, context = ...
 lusty.config('store')
 
 local store = function(method)
-  return function(query)
-    lusty:publish({'store', method}, query)
+  return function(collection, query, data)
+    lusty:publish(
+      {'store', method, collection},
+      data and {query = query, data = data} or {data = query}
+    )
   end
 end
 
