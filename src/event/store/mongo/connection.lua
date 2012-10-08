@@ -16,10 +16,10 @@ local db = conn:get_db_handle(config.database)
 
 if config.secure then
   ok, err = db:auth(config.username, config.password)
-end
 
-if not ok then
-  lusty.config.log(err ,"error")
+  if not ok then
+    lusty.config.log(err ,"error")
+  end
 end
 
 return db
