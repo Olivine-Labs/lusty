@@ -1,7 +1,7 @@
 return {
   handler = function(context)
     local json = require 'dkjson'
-    context.data = json.decode(context.request.body)
+    context.input = json.decode(context.request.body)
   end,
   options = {
     predicate = function(context)

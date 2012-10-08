@@ -1,4 +1,5 @@
 local lusty, context = ...
 context.request   = lusty.server.request
 context.response  = lusty.server.response
-context.data      = {}
+context.input     = {}
+context.output    = {}
