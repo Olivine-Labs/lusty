@@ -40,7 +40,7 @@ describe("Lusty core test", function()
   }
 
   it("Tests instantiation", function()
-    lusty(config)
-    assert.are.equal(lusty.server.response.status, 200)
+    local context = lusty(config)
+    assert.are.equal(context.lusty.server.response.status, 200)
   end)
 end)

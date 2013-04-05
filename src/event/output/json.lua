@@ -1,8 +1,13 @@
 return {
   handler = function(context)
     context.response.headers["content-type"] = "application/json"
+    local output = context.output
+    local meta = getmetatable(output)
+    if meta and type(meta.__toView) == "function" then
+      output = meta.__toView(output, context)
+    end
     local json = require 'dkjson'
-    context.response.body = json.encode(context.output)
+    context.response.body = json.encode(output)
   end,
   options = {
     predicate = function(context)
