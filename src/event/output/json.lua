@@ -9,6 +9,7 @@ return {
     local json = require 'dkjson'
     context.response.body = json.encode(output)
   end,
+
   options = {
     predicate = function(context)
       local accept = context.request.headers.accept or "application/json"
