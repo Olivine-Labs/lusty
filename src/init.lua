@@ -1,7 +1,8 @@
 --LUSTY
 --An event based modular request router
 
-local function requireArgs(self, name, ...)
+--load file, memoize, execute loaded function with arguments
+local function requireArgs(name, ...)
 
   local file = package.loaded[name]
   if not file then
@@ -14,7 +15,7 @@ end
 --loads and registers a subscriber
 local function subscribe(self, channel, subscriberName, configName)
 
-  local subscriber = requireArgs(self, subscriberName, self, configName)
+  local subscriber = requireArgs(subscriberName, self, configName)
 
   local composedHandler = function(context)
     self.current_namespace = configName or table.concat(channel, '.')
@@ -77,7 +78,6 @@ local function split(str, sep)
 
 end
 
---publish with lazy load of subscribers
 local function publish(self, channel, context)
 
   table.insert(channel, context.request.headers.method)
@@ -90,7 +90,7 @@ local function publish(self, channel, context)
 end
 
 --Publish events
-local function publishRequest(self, context)
+local function publishers(self, context)
 
   for _,channel in pairs(self.config.publishers) do
     publish(self, copy(channel), context)
@@ -128,7 +128,7 @@ local function doRequest(self)
   }, self.context.__meta)
 
   --Do events, publish with context
-  publishRequest(self, context)
+  publishers(self, context)
 
   --finally, return the context
   return context
