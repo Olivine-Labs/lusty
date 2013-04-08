@@ -149,7 +149,18 @@ end
 local function loadDefaultContext(self, contextConfig)
 
   local context = {
-    lusty = self
+
+    lusty = self,
+
+    --meta table to load from default context
+    __meta = {
+
+      __index = function(context, key)
+        return rawget(context, key) or self.context[key]
+      end
+
+    }
+
   }
 
   for _, path in pairs(contextConfig) do
@@ -163,12 +174,7 @@ end
 
 local function doRequest(self)
 
-  local context = {}
-
-  --fill from default context
-  for k, v in pairs(self.context) do
-    context[k] = v
-  end
+  local context = setmetatable({}, self.context.__meta)
 
   context.request   = self.server.getRequest()
   context.response  = self.server.getResponse()
