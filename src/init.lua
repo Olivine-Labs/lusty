@@ -1,10 +1,20 @@
 --LUSTY
 --An event based modular request router
 
---loads and registers a subscriber
-local function subscribeUnboxed(self, channel, subscriberName, configName)
+local function requireArgs(self, name, ...)
 
-  local subscriber = package.loaders[2](subscriberName)(self, configName)
+  local file = package.loaded[name]
+  if not file then
+    file = package.loaders[2](name)
+    package.loaded[name] = file
+  end
+  return file(...)
+end
+
+--loads and registers a subscriber
+local function subscribe(self, channel, subscriberName, configName)
+
+  local subscriber = requireArgs(self, subscriberName, self, configName)
 
   local composedHandler = function(context)
     self.current_namespace = configName or table.concat(channel, '.')
@@ -15,55 +25,6 @@ local function subscribeUnboxed(self, channel, subscriberName, configName)
   self.event:subscribe(channel, composedHandler, subscriber.options)
 end
 
-local function subscribe(self, channel, list)
-
-  for key,mod in pairs(list) do
-
-    if type(key) ~= "string" then
-
-      local subscriberName, configName = false, false
-
-      if type(mod) == "table" then
-        subscriberName = mod[1]
-        if #mod > 1 then configName = mod[2] end
-
-      elseif type(mod) == "string" then
-        subscriberName = mod
-      end
-
-      subscribeUnboxed(self, channel, subscriberName, configName)
-
-    end
-  end
-
-end
-
---only loads subscribers for parent channels of channel
-local function subscribers(self, channel)
-
-  local list = self.config.subscribers
-  local currentNamespace = {}
-
-  --used to store a record of loaded namespaces
-  local loaded = self.loaded
-
-  for _, namespace in pairs(channel) do
-
-    list = list[namespace]
-    if not list then break end
-
-    table.insert(currentNamespace, namespace)
-
-    if not loaded[namespace] then
-      subscribe(self, currentNamespace, list)
-      loaded[namespace] = {}
-    end
-
-    loaded = loaded[namespace]
-  end
-
-end
-
 local function copy(thing)
   local new = {}
   for k, v in pairs(thing) do
@@ -72,39 +33,36 @@ local function copy(thing)
   return new
 end
 
-local function allSubscribers(self, list, channel)
+local function subscribers(self, list, channel)
+
   if not channel then channel = {} end
+
   for k,v in pairs(list or self.config.subscribers) do
+
     local root = false
     local newChannel = channel
     if type(k) == "number" then
       root = true
     else
       newChannel = copy(channel)
-      table.insert(channel, k)
+      table.insert(newChannel, k)
     end
 
-    if not root and type(v) == "string" then
-      subscribeUnboxed(self, newChannel, v, false)
-    elseif type(v) == "table" then
+    local valueType = type(v)
+    if valueType == "string" then
+      subscribe(self, newChannel, v, false)
+    elseif valueType == "table" then
       if root then
         local subscriberName, configName = false, false
 
-        if type(v) == "table" then
-          subscriberName = v[1]
-          if #v > 1 then configName = v[2] end
+        subscriberName = v[1]
+        if #v > 1 then configName = v[2] end
 
-        elseif type(v) == "string" then
-          subscriberName = v
-        end
-
-        subscribeUnboxed(self, newChannel, subscriberName, configName)
-
+        subscribe(self, newChannel, subscriberName, configName)
       else
-        allSubscribers(self, v, newChannel)
+        subscribers(self, v, newChannel)
       end
     end
-
   end
 end
 
@@ -122,11 +80,6 @@ end
 --publish with lazy load of subscribers
 local function publish(self, channel, context)
 
-  if self.config.lazy then
-    --Lazily load subscribers for affected channels, then publish event
-    subscribers(self, channel)
-  end
-
   table.insert(channel, context.request.headers.method)
 
   for _, v in pairs(split(context.request.url, '/')) do
@@ -140,33 +93,26 @@ end
 local function publishRequest(self, context)
 
   for _,channel in pairs(self.config.publishers) do
-    publish(self, channel, context)
+    publish(self, copy(channel), context)
   end
 
 end
 
 --Add data to context
-local function loadDefaultContext(self, contextConfig)
+local function globalContext(self, contextConfig)
 
   local context = {
-
     lusty = self,
-
     --meta table to load from default context
     __meta = {
-
       __index = function(context, key)
         return rawget(context, key) or self.context[key]
       end
-
     }
-
   }
 
   for _, path in pairs(contextConfig) do
-
     package.loaders[2]('context.'..path)(context)
-
   end
 
   return context
@@ -174,12 +120,12 @@ end
 
 local function doRequest(self)
 
-  local context = setmetatable({}, self.context.__meta)
-
-  context.request   = self.server.getRequest()
-  context.response  = self.server.getResponse()
-  context.input     = {}
-  context.output    = {}
+  local context = setmetatable({
+    request   = self.server.getRequest(),
+    response  = self.server.getResponse(),
+    input     = {},
+    output    = {},
+  }, self.context.__meta)
 
   --Do events, publish with context
   publishRequest(self, context)
@@ -199,7 +145,8 @@ local __meta = {
       server            = {},
       loaded            = {},
       current_namespace = 'lusty',
-      doRequest         = doRequest
+      doRequest         = doRequest,
+      requireArgs       = requireArgs
     }
 
     --argument can either be a path to a config base path, or a fully built config table
@@ -216,11 +163,9 @@ local __meta = {
     lusty.server = require('server.'..lusty.config.server)
 
     --Create the global context variables
-    lusty.context = loadDefaultContext(lusty, lusty.config.context)
+    lusty.context = globalContext(lusty, lusty.config.context)
 
-    if not lusty.config.lazy then
-      allSubscribers(lusty)
-    end
+    subscribers(lusty)
 
     return lusty
   end

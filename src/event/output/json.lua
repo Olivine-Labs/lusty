@@ -11,7 +11,7 @@ return {
   end,
   options = {
     predicate = function(context)
-      local accept = context.request.headers.accept
+      local accept = context.request.headers.accept or "application/json"
       local content = context.request.headers["content-type"]
       if type(context.output) == "table" then
         if accept then
