@@ -1,4 +1,5 @@
-local lusty, context = ...
+local context = ...
+
 context.options = function(key)
-  return lusty.config[lusty.current_namespace][key]
+  return context.lusty.config[context.lusty.current_namespace][key]
 end

@@ -1,4 +1,4 @@
 return {
-  request = require 'server.request',
-  response = require 'server.response'
+  getRequest = function() return require 'server.request' end,
+  getResponse = function() return require 'server.response' end
 }

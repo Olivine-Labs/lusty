@@ -91,25 +91,47 @@ local function publish(self, channel, context)
 end
 
 --Publish events
-local function publishers(self, context)
+local function publishRequest(self, context)
   for _,channel in pairs(self.config.publishers) do
     publish(self, channel, context)
   end
 end
 
 --Add data to context
-local function makeContext(self)
+local function loadDefaultContext(self, contextConfig)
 
   local context = {
     lusty = self
   }
 
-  for _, path in pairs(self.config.context) do
-    package.loaders[2]('context.'..path)(self, context)
+  for _, path in pairs(contextConfig) do
+
+    package.loaders[2]('context.'..path)(context)
+
   end
 
   return context
+end
 
+local function doRequest(self)
+
+  local context = {}
+
+  --fill from default context
+  for k, v in pairs(self.context) do
+    context[k] = v
+  end
+
+  context.request   = self.server.getRequest()
+  context.response  = self.server.getResponse()
+  context.input     = {}
+  context.output    = {}
+
+  --Do events, publish with context
+  publishRequest(self, context)
+
+  --finally, return the context
+  return context
 end
 
 local __meta = {
@@ -123,6 +145,7 @@ local __meta = {
       server            = {},
       loaded            = {},
       current_namespace = 'lusty',
+      doRequest         = doRequest
     }
 
     --argument can either be a path to a config base path, or a fully built config table
@@ -138,14 +161,10 @@ local __meta = {
     --Load server bindings based on configuration
     lusty.server = require('server.'..lusty.config.server)
 
-    --Create the context
-    local context = makeContext(lusty)
+    --Create the global context variables
+    lusty.context = loadDefaultContext(lusty, lusty.config.context)
 
-    --Do events, publish with context
-    publishers(lusty, context)
-
-    --and finally return the context so the results of the request may be examined
-    return context
+    return lusty
 
   end
 

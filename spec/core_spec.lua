@@ -32,7 +32,6 @@ describe("Lusty core test", function()
       {"output"}
     },
     context = {
-      'lusty',
       'options',
       'log',
       'store'
@@ -40,7 +39,8 @@ describe("Lusty core test", function()
   }
 
   it("Tests instantiation", function()
-    local context = lusty(config)
-    assert.are.equal(context.lusty.server.response.status, 200)
+    local lusty = lusty(config)
+    local context = lusty:doRequest()
+    assert.are.equal(context.response.status, 200)
   end)
 end)

@@ -1,9 +1,9 @@
-local lusty, context = ...
-lusty.config('store')
+local context = ...
+context.lusty.config('store')
 
 local store = function(method)
   return function(collection, query, data)
-    lusty:publish(
+    context.lusty:publish(
       {'store', method, collection},
       {query = query, data = data}
     )
