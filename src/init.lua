@@ -64,6 +64,50 @@ local function subscribers(self, channel)
 
 end
 
+local function copy(thing)
+  local new = {}
+  for k, v in pairs(thing) do
+    new[k] = v
+  end
+  return new
+end
+
+local function allSubscribers(self, list, channel)
+  if not channel then channel = {} end
+  for k,v in pairs(list or self.config.subscribers) do
+    local root = false
+    local newChannel = channel
+    if type(k) == "number" then
+      root = true
+    else
+      newChannel = copy(channel)
+      table.insert(channel, k)
+    end
+
+    if not root and type(v) == "string" then
+      subscribeUnboxed(self, newChannel, v, false)
+    elseif type(v) == "table" then
+      if root then
+        local subscriberName, configName = false, false
+
+        if type(v) == "table" then
+          subscriberName = v[1]
+          if #v > 1 then configName = v[2] end
+
+        elseif type(v) == "string" then
+          subscriberName = v
+        end
+
+        subscribeUnboxed(self, newChannel, subscriberName, configName)
+
+      else
+        allSubscribers(self, v, newChannel)
+      end
+    end
+
+  end
+end
+
 local function split(str, sep)
 
   local sep, fields = sep or ":", {}
@@ -78,8 +122,10 @@ end
 --publish with lazy load of subscribers
 local function publish(self, channel, context)
 
-  --Lazily load subscribers for affected channels, then publish event
-  subscribers(self, channel)
+  if self.config.lazy then
+    --Lazily load subscribers for affected channels, then publish event
+    subscribers(self, channel)
+  end
 
   table.insert(channel, context.request.headers.method)
 
@@ -92,9 +138,11 @@ end
 
 --Publish events
 local function publishRequest(self, context)
+
   for _,channel in pairs(self.config.publishers) do
     publish(self, channel, context)
   end
+
 end
 
 --Add data to context
@@ -151,7 +199,7 @@ local __meta = {
     --argument can either be a path to a config base path, or a fully built config table
     if type(config) == "string" then
       lusty.config.path = config
-    else
+    elseif type(config) == "table" then
       lusty.config = setmetatable(config, getmetatable(lusty.config))
     end
 
@@ -164,8 +212,11 @@ local __meta = {
     --Create the global context variables
     lusty.context = loadDefaultContext(lusty, lusty.config.context)
 
-    return lusty
+    if not lusty.config.lazy then
+      allSubscribers(lusty)
+    end
 
+    return lusty
   end
 
 }

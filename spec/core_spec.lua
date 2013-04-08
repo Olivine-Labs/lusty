@@ -9,6 +9,7 @@ describe("Lusty core test", function()
     log = {
       level = "debug"
     },
+    lazy = false,
     server = 'stub',
     subscribers = {
       input = {
