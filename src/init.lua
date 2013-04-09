@@ -122,8 +122,8 @@ end
 local function doRequest(self)
 
   local context = setmetatable({
-    request   = self.server.getRequest(),
-    response  = self.server.getResponse(),
+    request   = self.config.server.getRequest(),
+    response  = self.config.server.getResponse(),
     input     = {},
     output    = {},
   }, self.context.__meta)
@@ -142,35 +142,16 @@ local __meta = {
 
     local lusty = {
       event             = require 'mediator'(),
-      config            = require 'config',
-      server            = {},
-      loaded            = {},
-      current_namespace = 'lusty',
       doRequest         = doRequest,
       requireArgs       = requireArgs
     }
 
-    --argument can either be a path to a config base path, or a fully built config table
-    if type(config) == "string" then
-      lusty.config.path = config
-    elseif type(config) == "table" then
-      lusty.config = setmetatable(config, getmetatable(lusty.config))
-    end
-
-    --Initiate configuration
-    lusty.config('lusty')
-
-    --Load server bindings based on configuration
-    lusty.server = require('server.'..lusty.config.server)
-
-    --Create the global context variables
+    lusty.config = config
     lusty.context = globalContext(lusty, lusty.config.context)
-
     subscribers(lusty)
 
     return lusty
   end
-
 }
 
 return setmetatable({}, __meta)

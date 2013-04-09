@@ -1,5 +1,4 @@
 local context = ...
-context.lusty.config('store')
 
 local store = function(method)
   return function(collection, query, data)

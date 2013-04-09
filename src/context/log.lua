@@ -1,6 +1,4 @@
-local context = ...
-
-context.lusty.config('log')
+local context, config = ...
 
 local levels = {
   debug   = 1,
@@ -13,7 +11,7 @@ context.log = function(message, level)
 
   if not level then level = 'debug' end
 
-  if levels[context.options('level')] >= levels[level] then
+  if levels[config.level] >= levels[level] then
     context.lusty:publish({'log', level}, {
       context = context,
       message = message,
@@ -22,5 +20,3 @@ context.log = function(message, level)
   end
 
 end
-
-context.lusty.config.log = context.log
