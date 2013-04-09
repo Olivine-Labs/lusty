@@ -1,5 +1,8 @@
 return {
   handler = function(context)
-    context.store("logs", {level=context.level, message = context.message})
+    context.store("logs", {
+      level=context.level,
+      message = context.message
+    })
   end
 }

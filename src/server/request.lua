@@ -1,6 +1,5 @@
-local request = {
+return {
   url = "",
   headers = {},
   data = {}
 }
-return request

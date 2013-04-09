@@ -1,6 +1,7 @@
 local lusty, config = ...
 local db = lusty.requireArgs('event.store.mongo.connection', lusty)
 local col = db.get_col(config.collection)
+
 return {
   handler = function(context)
     local query, data = context.query, context.data
