@@ -1,5 +1,5 @@
 local lusty, config = ...
-local db = lusty.requireArgs('event.store.mongo.connection', lusty)
+local db = lusty.requireArgs('event.store.mongo.connection', lusty, config)
 local col = db.get_col(config.collection)
 
 return {
