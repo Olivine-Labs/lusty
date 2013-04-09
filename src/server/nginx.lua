@@ -13,13 +13,16 @@ end
 
 local function getResponse()
   local response = require 'server.response'
+  response.send = function(body)
+    ngx.log(ngx.DEBUG, body)
+    ngx.say(body)
+    ngx.flush(true)
+  end
 
   response = setmetatable(response, {
     __index = function(self, key)
       if key == "status" then
         return ngx.status
-      elseif key == "body" then
-        return ngx.body
       else
         return rawget(self, key)
       end
@@ -34,12 +37,7 @@ local function getResponse()
     end
   })
 
-  for k,v in pairs(response.headers) do
-    ngx.header[k] = v
-  end
-
-  ngx.say(response.body)
-  ngx.flush(true)
+  response.headers = ngx.header
 
   return response
 end

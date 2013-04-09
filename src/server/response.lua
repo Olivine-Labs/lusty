@@ -1,6 +1,7 @@
 local response = {
   headers = {},
-  body = "",
+  send = function(body) end,
+  ["end"] = function() end,
   status = 404
 }
 
