@@ -1,7 +1,4 @@
-local lusty = ...
-local namespace = 'store.mongo'
-lusty.config(namespace)
-local config = lusty.config[namespace]
+local lusty, config = ...
 
 local mongo = require "resty.mongol"
 local conn = mongo:new()

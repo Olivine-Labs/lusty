@@ -13,14 +13,12 @@ local function requireArgs(name, ...)
 end
 
 --loads and registers a subscriber
-local function subscribe(self, channel, subscriberName, configName)
+local function subscribe(self, channel, subscriberName, config)
 
-  local subscriber = requireArgs(subscriberName, self, configName)
+  local subscriber = requireArgs(subscriberName, self, config)
 
   local composedHandler = function(context)
-    self.current_namespace = configName or table.concat(channel, '.')
     subscriber.handler(context)
-    self.current_namespace = 'lusty'
   end
 
   self.event:subscribe(channel, composedHandler, subscriber.options)
@@ -40,27 +38,30 @@ local function subscribers(self, list, channel)
 
   for k,v in pairs(list or self.config.subscribers) do
 
-    local root = false
     local newChannel = channel
-    if type(k) == "number" then
-      root = true
+
+    if type(k) == "number" and type(v) == "table" then
+      for k2, v2 in pairs(v) do
+        local name = ""
+        local config = {}
+        if type(k2) == "number" then
+          name=v2
+        else
+          name=k2
+          config=v2
+        end
+        subscribe(self, newChannel, name, config)
+      end
     else
-      newChannel = copy(channel)
-      table.insert(newChannel, k)
-    end
+      if type(k) == "string" then
+        newChannel = copy(channel)
+        table.insert(newChannel, k)
+      end
 
-    local valueType = type(v)
-    if valueType == "string" then
-      subscribe(self, newChannel, v, false)
-    elseif valueType == "table" then
-      if root then
-        local subscriberName, configName = false, false
-
-        subscriberName = v[1]
-        if #v > 1 then configName = v[2] end
-
-        subscribe(self, newChannel, subscriberName, configName)
-      else
+      local valueType = type(v)
+      if valueType == "string" then
+        subscribe(self, newChannel, v, false)
+      elseif valueType == "table" then
         subscribers(self, v, newChannel)
       end
     end

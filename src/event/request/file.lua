@@ -1,8 +1,6 @@
-local lusty, namespace = ...
-lusty.config(namespace)
+local lusty, config = ...
 return {
   handler = function(context)
-    local file = context.options('file')
-    lusty.requireArgs(file, context)
+    lusty.requireArgs(config.file, context)
  end
 }

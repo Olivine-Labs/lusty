@@ -1,5 +1,0 @@
-context = {
-  'options',
-  'log',
-  'store'
-}

@@ -3,27 +3,14 @@ package.path = '../src/?.lua;'..package.path
 describe("Lusty core test", function()
   local lusty = require 'init'
   local config = {
-    ["config.requests.root"] = {
-      file = 'config.handlers.root'
-    },
-    log = {
-      level = "debug"
-    },
-    lazy = false,
     server = 'stub',
     subscribers = {
-      input = {
-        'event.input.json'
-      },
+      input = { 'event.input.json' },
       request = {
-        {'event.request.file', 'config.requests.root'}
+        { ['event.request.file'] = { file = 'handlers.root' } }
       },
-      output = {
-        'event.output.json'
-      },
-      log = {
-        'event.log.console'
-      }
+      output = { 'event.output.json' },
+      log = { 'event.log.console' }
     },
     publishers = {
       {"input"},
