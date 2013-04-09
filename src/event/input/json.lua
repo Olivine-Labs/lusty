@@ -1,6 +1,6 @@
+local json = require 'dkjson'
 return {
   handler = function(context)
-    local json = require 'dkjson'
     context.input = json.decode(context.request.body)
   end,
 

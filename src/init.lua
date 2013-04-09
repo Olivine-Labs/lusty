@@ -69,19 +69,16 @@ local function subscribers(self, list, channel)
   end
 end
 
-local function split(str, sep)
-  local sep, fields = sep or ":", {}
-
-  local pattern = string.format("([^%s]+)", sep)
-  str:gsub(pattern, function(c) fields[#fields+1] = c end)
-
+local function split(str)
+  local fields = {}
+  str:gsub("([^/]+)", function(c) fields[#fields+1] = c end)
   return fields
 end
 
 local function publish(self, channel, context)
   table.insert(channel, context.request.headers.method)
 
-  for _, v in pairs(split(context.request.url, '/')) do
+  for _, v in pairs(split(context.request.url)) do
     table.insert(channel, v)
   end
 
@@ -90,8 +87,8 @@ end
 
 --Publish events
 local function publishers(self, context)
-  for _,channel in pairs(self.config.publishers) do
-    publish(self, copy(channel), context)
+  for _,channel in ipairs(self.config.publishers) do
+    publish(self, channel, context)
   end
 end
 
@@ -118,7 +115,7 @@ local function globalContext(self, contextConfig)
       config = v
     end
 
-    package.loaders[2]('context.'..path)(context, config)
+    requireArgs('context.'..path, context, config)
   end
 
   return context
@@ -139,23 +136,20 @@ local function doRequest(self)
   return context
 end
 
-local __meta = {
+--instantiate a lusty request handler
+local function init(config)
 
-  --instantiate a lusty request handler
-  __call = function(self, config)
+  local lusty = {
+    event             = require 'mediator'(),
+    doRequest         = doRequest,
+    requireArgs       = requireArgs
+  }
 
-    local lusty = {
-      event             = require 'mediator'(),
-      doRequest         = doRequest,
-      requireArgs       = requireArgs
-    }
+  lusty.config = config
+  lusty.context = globalContext(lusty, lusty.config.context)
+  subscribers(lusty)
 
-    lusty.config = config
-    lusty.context = globalContext(lusty, lusty.config.context)
-    subscribers(lusty)
+  return lusty
+end
 
-    return lusty
-  end
-}
-
-return setmetatable({}, __meta)
+return init

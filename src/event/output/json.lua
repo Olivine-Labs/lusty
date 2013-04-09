@@ -1,3 +1,4 @@
+local json = require 'dkjson'
 return {
   handler = function(context)
     context.response.headers["content-type"] = "application/json"
@@ -8,8 +9,6 @@ return {
     if meta and type(meta.__toView) == "function" then
       output = meta.__toView(output, context)
     end
-
-    local json = require 'dkjson'
 
     context.response.send(json.encode(output))
   end,
