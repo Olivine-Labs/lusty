@@ -27,7 +27,7 @@ end
 local function copy(thing)
   local new = {}
 
-  for k, v in pairs(thing) do
+  for k,v in pairs(thing) do
     new[k] = v
   end
 
@@ -39,11 +39,11 @@ local function subscribers(self, list, channel)
 
   for k,v in pairs(list or self.config.subscribers) do
     local newChannel = channel
+    local vt, kt = type(v), type(k)
 
-    if type(k) == "number" and type(v) == "table" then
+    if kt == "number" and vt == "table" then
       for k2, v2 in pairs(v) do
-        local name = ""
-        local config = {}
+        local name, config
         if type(k2) == "number" then
           name=v2
         else
@@ -53,16 +53,14 @@ local function subscribers(self, list, channel)
         subscribe(self, newChannel, name, config)
       end
     else
-      if type(k) == "string" then
+      if kt == "string" then
         newChannel = copy(channel)
         table.insert(newChannel, k)
       end
 
-      local valueType = type(v)
-
-      if valueType == "string" then
-        subscribe(self, newChannel, v, false)
-      elseif valueType == "table" then
+      if vt == "string" then
+        subscribe(self, newChannel, v)
+      elseif vt == "table" then
         subscribers(self, v, newChannel)
       end
     end
@@ -75,11 +73,11 @@ local function split(str)
   return fields
 end
 
-local function publish(self, channel, context)
+local function publish(self, channel, context, urlTable)
   table.insert(channel, context.request.headers.method)
 
-  for _, v in pairs(split(context.request.url)) do
-    table.insert(channel, v)
+  for k=1, #urlTable do
+    table.insert(channel, urlTable[k])
   end
 
   self.event:publish(channel, context)
@@ -87,8 +85,9 @@ end
 
 --Publish events
 local function publishers(self, context)
-  for _,channel in ipairs(self.config.publishers) do
-    publish(self, channel, context)
+  local urlTable = split(context.request.url)
+  for k=1, #self.config.publishers do
+    publish(self, self.config.publishers[k], context, urlTable)
   end
 end
 
@@ -106,10 +105,11 @@ local function globalContext(self, contextConfig)
   }
 
   for k, v in pairs(contextConfig) do
-    local path, config = "", {}
+    local path, config
 
     if type(k) == "number" then
       path = v
+      config = {}
     else
       path = k
       config = v
