@@ -24,8 +24,8 @@ build = {
   },
   install = {
     bin = {
-      ["busted"] = "bin/lusty",
-      ["busted.bat"] = "bin/lusty.bat",
+      ["lusty"] = "bin/lusty",
+      ["lusty.bat"] = "bin/lusty.bat",
       ["lusty_bootstrap"] = "bin/lusty_bootstrap"
     }
   }
