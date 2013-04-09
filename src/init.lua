@@ -112,8 +112,15 @@ local function globalContext(self, contextConfig)
     }
   }
 
-  for _, path in pairs(contextConfig) do
-    package.loaders[2]('context.'..path)(context)
+  for k, v in pairs(contextConfig) do
+    local path, config = "", {}
+    if type(k) == "number" then
+      path = v
+    else
+      path = k
+      config = v
+    end
+    package.loaders[2]('context.'..path)(context, config)
   end
 
   return context
