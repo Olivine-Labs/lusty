@@ -74,8 +74,6 @@ local function split(str)
 end
 
 local function publish(self, channel, context, urlTable)
-  table.insert(channel, context.request.headers.method)
-
   for k=1, #urlTable do
     table.insert(channel, urlTable[k])
   end
