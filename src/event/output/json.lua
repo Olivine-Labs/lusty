@@ -18,11 +18,7 @@ return {
       local accept = context.request.headers.accept or "application/json"
       local content = context.request.headers["content-type"]
 
-      if type(context.output) == "table" then
-        return accept == "application/json" or content == "application/json"
-      end
-
-      return false
+      return accept == "application/json" or content == "application/json"
     end
   }
 }

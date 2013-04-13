@@ -1,37 +1,42 @@
 --LUSTY
 --An event based modular request router
+local loader, loaded = package.loaders[2], package.loaded
 
---load file, memoize, execute loaded function with arguments
-local function requireArgs(name, ...)
-  local file = package.loaded[name]
+--load file, memoize, execute loaded function inside environment
+local function inline(name, env, noglobals)
+  local file = loaded[name]
 
   if not file then
-    file = package.loaders[2](name)
-    package.loaded[name] = file
+    file = loader(name)
+    loaded[name] = file
   end
 
-  return file(...)
+  local newenv = env
+  if not noglobals then
+    newenv=getfenv()
+    --hide inline scope
+    newenv.name=nil
+    newenv.env=nil
+    newenv.noglobals=nil
+
+    --copy in scope from env
+    for k, v in pairs(env) do
+      newenv[k]=v
+    end
+  end
+
+  return setfenv(file, newenv)()
 end
 
 --loads and registers a subscriber
 local function subscribe(self, channel, subscriberName, config)
-  local subscriber = requireArgs(subscriberName, self, config)
+  local subscriber = inline(subscriberName, {lusty=self, config=config})
 
   local composedHandler = function(context)
     subscriber.handler(context)
   end
 
   self.event:subscribe(channel, composedHandler, subscriber.options)
-end
-
-local function copy(thing)
-  local new = {}
-
-  for k,v in pairs(thing) do
-    new[k] = v
-  end
-
-  return new
 end
 
 local function subscribers(self, list, channel)
@@ -54,8 +59,11 @@ local function subscribers(self, list, channel)
       end
     else
       if kt == "string" then
-        newChannel = copy(channel)
-        table.insert(newChannel, k)
+        newChannel = {}
+        for k2=1,#channel do
+          newChannel[k2]=channel[k2]
+        end
+        newChannel[#newChannel+1]=k
       end
 
       if vt == "string" then
@@ -67,15 +75,9 @@ local function subscribers(self, list, channel)
   end
 end
 
-local function split(str)
-  local fields = {}
-  str:gsub("([^/]+)", function(c) fields[#fields+1] = c end)
-  return fields
-end
-
 local function publish(self, channel, context, urlTable)
   for k=1, #urlTable do
-    table.insert(channel, urlTable[k])
+    channel[#channel+1] = urlTable[k]
   end
 
   self.event:publish(channel, context)
@@ -83,16 +85,20 @@ end
 
 --Publish events
 local function publishers(self, context)
-  local urlTable = split(context.request.url)
-  for k=1, #self.config.publishers do
-    publish(self, self.config.publishers[k], context, urlTable)
+  local urlTable, publishers = {}, self.config.publishers
+
+  --split url at /
+  string.gsub(context.request.url, "([^/]+)", function(c) urlTable[#urlTable+1] = c end)
+
+  for k=1, #publishers do
+    publish(self, publishers[k], context, urlTable)
   end
 end
 
 --Add data to context
-local function globalContext(self, contextConfig)
+local function context(self, contextConfig)
 
-  local context = {
+  local ctxt = {
     lusty = self,
     --meta table to load from default context
     __meta = {
@@ -113,16 +119,18 @@ local function globalContext(self, contextConfig)
       config = v
     end
 
-    requireArgs('context.'..path, context, config)
+    inline('context.'..path, {context=ctxt, config=config})
   end
 
-  return context
+  return ctxt
 end
 
-local function doRequest(self)
+local function request(self)
+  local server = self.config.server
+
   local context = setmetatable({
-    request   = self.config.server.getRequest(),
-    response  = self.config.server.getResponse(),
+    request   = server.getRequest(),
+    response  = server.getResponse(),
     input     = {},
     output    = {},
   }, self.context.__meta)
@@ -138,13 +146,13 @@ end
 local function init(config)
 
   local lusty = {
+    config            = config,
     event             = require 'mediator'(),
-    doRequest         = doRequest,
-    requireArgs       = requireArgs
+    request           = request,
+    inline            = inline
   }
 
-  lusty.config = config
-  lusty.context = globalContext(lusty, lusty.config.context)
+  lusty.context = context(lusty, config.context)
   subscribers(lusty)
 
   return lusty

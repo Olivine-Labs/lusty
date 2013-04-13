@@ -1,5 +1,3 @@
-local context, config = ...
-
 local levels = {
   debug   = 1,
   info    = 2,

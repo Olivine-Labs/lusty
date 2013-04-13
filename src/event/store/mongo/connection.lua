@@ -1,5 +1,3 @@
-local lusty, config = ...
-
 local mongo = require "resty.mongol"
 local conn = mongo:new()
 local conn:set_timeout(config.timeout)
