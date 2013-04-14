@@ -5,12 +5,7 @@ local util = require 'util'
 --loads and registers a subscriber
 local function subscribe(self, channel, subscriberName, config)
   local subscriber = util.inline(subscriberName, {config=config})
-
-  local composedHandler = function(context)
-    subscriber.handler(context)
-  end
-
-  self.event:subscribe(channel, composedHandler, subscriber.options)
+  self.event:subscribe(channel, subscriber.handler, subscriber.options)
 end
 
 local function subscribers(self, list, channel)
@@ -73,7 +68,6 @@ end
 local function context(self, contextConfig)
 
   local ctxt = {
-    lusty = self,
     --meta table to load from default context
     __meta = {
       __index = function(context, key)
