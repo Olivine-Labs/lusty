@@ -1,6 +1,7 @@
-local config = ...
+local util = require 'util'
+
 return {
   handler = function(context)
-    context.lusty.inline(config.file, {context})
+    util.inline(config.file, {context=context})
   end
 }

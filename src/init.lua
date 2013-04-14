@@ -1,22 +1,10 @@
 --LUSTY
 --An event based modular request router
-local loader, loaded = package.loaders[2], package.loaded
-
---load file, memoize, execute loaded function inside environment
-local function inline(name, env)
-  local file = loaded[name]
-
-  if not file then
-    file = loader(name)
-    loaded[name] = file
-  end
-
-  return file(unpack(env))
-end
+local util = require 'util'
 
 --loads and registers a subscriber
 local function subscribe(self, channel, subscriberName, config)
-  local subscriber = inline(subscriberName, {config})
+  local subscriber = util.inline(subscriberName, {config=config})
 
   local composedHandler = function(context)
     subscriber.handler(context)
@@ -105,7 +93,7 @@ local function context(self, contextConfig)
       config = v
     end
 
-    inline('context.'..path, {ctxt, config})
+    util.inline('context.'..path, {context=ctxt, config=config})
   end
 
   return ctxt
@@ -135,7 +123,6 @@ local function init(config)
     config            = config,
     event             = require 'mediator'(),
     request           = request,
-    inline            = inline
   }
 
   lusty.context = context(lusty, config.context)
