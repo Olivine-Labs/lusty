@@ -1,5 +1,6 @@
+local config = ...
 return {
   handler = function(context)
-    lusty.inline(config.file, {context=context})
+    context.lusty.inline(config.file, {context})
   end
 }

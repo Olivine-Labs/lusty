@@ -1,3 +1,5 @@
+local context, config = ...
+
 local store = function(method)
   return function(collection, query, data)
     context.lusty:publish(

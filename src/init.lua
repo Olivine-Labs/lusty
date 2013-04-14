@@ -3,7 +3,7 @@
 local loader, loaded = package.loaders[2], package.loaded
 
 --load file, memoize, execute loaded function inside environment
-local function inline(name, env, noglobals)
+local function inline(name, env)
   local file = loaded[name]
 
   if not file then
@@ -11,26 +11,12 @@ local function inline(name, env, noglobals)
     loaded[name] = file
   end
 
-  local newenv = env
-  if not noglobals then
-    newenv=getfenv()
-    --hide inline scope
-    newenv.name=nil
-    newenv.env=nil
-    newenv.noglobals=nil
-
-    --copy in scope from env
-    for k, v in pairs(env) do
-      newenv[k]=v
-    end
-  end
-
-  return setfenv(file, newenv)()
+  return file(unpack(env))
 end
 
 --loads and registers a subscriber
 local function subscribe(self, channel, subscriberName, config)
-  local subscriber = inline(subscriberName, {lusty=self, config=config})
+  local subscriber = inline(subscriberName, {config})
 
   local composedHandler = function(context)
     subscriber.handler(context)
@@ -119,7 +105,7 @@ local function context(self, contextConfig)
       config = v
     end
 
-    inline('context.'..path, {context=ctxt, config=config})
+    inline('context.'..path, {ctxt, config})
   end
 
   return ctxt
