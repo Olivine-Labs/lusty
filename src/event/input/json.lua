@@ -1,4 +1,5 @@
-local json = require 'dkjson'
+local json = config.json
+
 return {
   handler = function(context)
     context.input = json.decode(context.request.body)

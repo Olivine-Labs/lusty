@@ -5,12 +5,18 @@ describe("Lusty core test", function()
   local config = {
     server = require 'server.stub',
     subscribers = {
-      input = { 'event.input.json' },
+      input = {
+        { ['event.input.json'] = { json = require 'dkjson' } }
+      },
       request = {
         { ['event.request.file'] = { file = 'handlers.root' } }
       },
-      output = { 'event.output.json' },
-      log = { 'event.log.console' }
+      output = {
+        { ['event.output.json'] = { json = require 'dkjson' } }
+      },
+      log = {
+        { 'event.log.console' }
+      }
     },
     publishers = {
       {"input"},
