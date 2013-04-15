@@ -1,14 +1,10 @@
 local loader, loaded = package.loaders[2], package.loaded
 
-local function copyGlobals()
-  local globals = {}
-  for k, v in pairs(_G) do
-    globals[k] = v
+local inlineMeta = {
+  __index = function(self, key)
+    return rawget(self, key) or _G[key]
   end
-  return globals
-end
-
-local inlineEnv = copyGlobals()
+}
 
 --load file, memoize, execute loaded function inside environment
 local function inline(name, env)
@@ -19,12 +15,7 @@ local function inline(name, env)
     loaded[name] = file
   end
 
-  if env then
-    for k, v in pairs(env) do
-      inlineEnv[k] = v
-    end
-  end
-  return setfenv(file, inlineEnv)()
+  return setfenv(file, setmetatable(env, inlineMeta))()
 end
 
 return {
