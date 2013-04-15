@@ -35,27 +35,32 @@ a series of pub / sub calls:
 
 {
   events = {
-    ["data:request:user:get"] =  "get_user",
-    ["data:request:user:save"] =  "save_user",
-    ["data:request:user:delete"] =  "delete_user"
+    ["data:request:user:get"] =  "data.persistance.user#get_user",
+    ["data:request:user:save"] =  "data.persistance.user#save_user",
+    ["data:request:user:delete"] =  "data.persistance.user#delete_user"
   }
 }
 
 # data.persistence.user.lua
 local get_user = function(lusty, parameters, callback)
+  local user = {}
   # get user from mongodb, or mysql, or redis, or wherever
-  lusty.request.events.publish("data:response:user:get", user)
+  # return the user (added to results sent back) and "true", which tells lusty
+  # to continue on to the next event, if it needs to
+  return user, true
 end
 
 local save_user = function(lusty, user, callback)
-  # ...
+  local user = {}
+  # save user to your data store
+  return user, true
 end
 
 local delete_user = function(lusty, id, callback)
-  # ...
+  local user = {}
+  # save user from your data store
+  return user, true
 end
-
-return get_user, save_user, delete_user
 ```
 
 This pattern allows you to use any data store, and encourages building
@@ -67,12 +72,12 @@ publish / subscribe on any arbitrary channel.
 ### Event Management
 
 Events are namespaced. Calling "data:store:user" will call everything
-subscribing to "data:store:user", as well as all sub-channels. To enable global
-listening, it will also call "data:store" and "data" subscribers (but not
-sub-channels.)
+subscribing to "data:store:user", as well as all parent channels ("data:store"
+and "data").
 
 ## License
 
 Copyright 2013 Olivine Labs, LLC.
 
 [MIT licensed](http://www.opensource.org/licenses/mit-license.php).
+
