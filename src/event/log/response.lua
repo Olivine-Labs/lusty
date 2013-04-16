@@ -5,7 +5,7 @@ return {
     end
 
     table.insert(context.context.error, {
-      level = context.level, 
+      level = context.level,
       message = context.message
     })
   end
