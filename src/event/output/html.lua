@@ -17,9 +17,9 @@ return {
       local accept = context.request.headers.accept or "text/html"
       local content = context.request.headers["content-type"]
 
-      return (accept and accept:find("text/html")) or
+      return (accept and (accept:find("text/html") or accept:find("*/*"))) or
              (content and content:find("text/html")) or
-             (accept and accept:find("*/*"))
+             true
     end
   }
 }
