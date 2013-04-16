@@ -16,6 +16,10 @@ return {
 
   options = {
     predicate = function(context)
+      if config.default then
+        return true
+      end
+
       local accept = context.request.headers.accept
       local content = context.request.headers["content-type"]
 
