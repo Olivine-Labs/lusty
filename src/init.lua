@@ -92,11 +92,11 @@ local function context(self, contextConfig)
   return ctxt
 end
 
-local function request(self)
+local function request(self, request)
   local server = self.config.server
 
   local context = setmetatable({
-    request   = server.getRequest(),
+    request   = request or server.getRequest(),
     response  = server.getResponse(),
     input     = {},
     output    = {}
