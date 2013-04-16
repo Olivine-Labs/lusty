@@ -24,8 +24,8 @@ describe("Lusty core test", function()
       {"output"}
     },
     context = {
-      'log',
-      'store'
+      ['context.log'] = {},
+      ['context.store'] = {}
     }
   }
 

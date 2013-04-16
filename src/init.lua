@@ -87,7 +87,7 @@ local function context(self, contextConfig)
       config = v
     end
 
-    util.inline('context.'..path, {context=ctxt, config=config})
+    util.inline(path, {context=ctxt, config=config})
   end
 
   return ctxt
