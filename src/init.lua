@@ -3,15 +3,15 @@
 local util = require 'util'
 
 --loads and registers a subscriber
-local function subscribe(self, channel, subscriberName, config)
-  local subscriber = util.inline(subscriberName, {config=config})
+local function subscribe(self, channel, name, config)
+  local subscriber = util.inline(name, {config=config})
   self.event:subscribe(channel, subscriber.handler, subscriber.options)
 end
 
 local function subscribers(self, list, channel)
   if not channel then channel = {} end
 
-  for k,v in pairs(list or self.config.subscribers) do
+  for k, v in pairs(list or self.config.subscribers) do
     local newChannel = channel
     local vt, kt = type(v), type(k)
 
@@ -28,10 +28,7 @@ local function subscribers(self, list, channel)
       end
     else
       if kt == "string" then
-        newChannel = {}
-        for k2=1,#channel do
-          newChannel[k2]=channel[k2]
-        end
+        newChannel = {unpack(channel)}
         newChannel[#newChannel+1]=k
       end
 
