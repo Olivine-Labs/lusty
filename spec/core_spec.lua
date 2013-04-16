@@ -76,11 +76,11 @@ describe("Lusty core test", function()
     request.url = "a"
 
     local context = lusty:request(request)
-    assert.are.equal(context.output, "a")
+    assert.are.equal("a", context.output)
 
     request.url = "b"
 
     local context = lusty:request(request)
-    assert.are.equal(context.output, "b")
+    assert.are.equal("b", context.output)
   end)
 end)
