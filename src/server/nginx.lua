@@ -5,6 +5,8 @@ local server = {
 local function getRequest()
   local request = require 'server.request'
   request.headers = ngx.req.get_headers()
+  request.url = ngx.var.uri
+
   ngx.req.read_body()
   request.body = ngx.req.get_body_data()
 
@@ -13,8 +15,8 @@ end
 
 local function getResponse()
   local response = require 'server.response'
+
   response.send = function(body)
-    ngx.log(ngx.DEBUG, body)
     ngx.say(body)
     ngx.flush(true)
   end
