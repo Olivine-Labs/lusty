@@ -5,12 +5,12 @@ local levels = {
   error   = 4
 }
 
-context.log = function(message, level)
 
+context.log = function(message, level)
   if not level then level = levels.debug end
 
-  if levels[config.level] >= levels[level] then
-    context.lusty:publish({'log', level}, {
+  if (not levels[config.level]) or levels[config.level] <= levels[level] then
+    context.lusty.event:publish({ 'log', level }, {
       context = context,
       message = message,
       level = level

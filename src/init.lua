@@ -87,6 +87,8 @@ local function context(self, contextConfig)
     util.inline(path, {context=ctxt, config=config})
   end
 
+  ctxt.lusty = self
+
   return ctxt
 end
 
@@ -97,7 +99,7 @@ local function request(self)
     request   = server.getRequest(),
     response  = server.getResponse(),
     input     = {},
-    output    = {},
+    output    = {}
   }, self.context.__meta)
 
   --Do events, publish with context
