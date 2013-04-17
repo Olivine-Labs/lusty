@@ -1,7 +1,7 @@
 --LUSTY
 --An event based modular request router
 local util = require 'util'
-
+local json = require 'dkjson'
 --loads and registers a subscriber
 local function subscribe(self, channel, name, config)
   local subscriber = util.inline(name, {config=config})
@@ -57,7 +57,7 @@ local function publishers(self, context)
   string.gsub(context.request.url, "([^/]+)", function(c) urlTable[#urlTable+1] = c end)
 
   for k=1, #publishers do
-    publish(self, publishers[k], context, urlTable)
+    publish(self, {unpack(publishers[k])}, context, urlTable)
   end
 end
 
