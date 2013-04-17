@@ -1,7 +1,7 @@
 --LUSTY
 --An event based modular request router
 local util = require 'util'
-local json = require 'dkjson'
+
 --loads and registers a subscriber
 local function subscribe(self, channel, name, config)
   local subscriber = util.inline(name, {config=config})

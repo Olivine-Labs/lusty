@@ -3,13 +3,13 @@ local config = {
   server = require 'server.stub',
   subscribers = {
     input = {
-      { ['event.input.json'] = { json = require 'dkjson' } }
+      { ['event.input.json'] = { json = require 'cjson' } }
     },
     request = {
       { ['event.request.file'] = { file = 'handlers.root' } }
     },
     output = {
-      { ['event.output.json'] = { json = require 'dkjson' } }
+      { ['event.output.json'] = { json = require 'cjson' } }
     },
     log = {
       { 'event.log.console' }
