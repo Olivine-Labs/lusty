@@ -57,7 +57,7 @@ local function publishers(self, context)
   string.gsub(context.request.url, "([^/]+)", function(c) urlTable[#urlTable+1] = c end)
 
   for k=1, #publishers do
-    publish(self, publishers[k], context, urlTable)
+    publish(self, {unpack(publishers[k])}, context, urlTable)
   end
 end
 
@@ -92,11 +92,11 @@ local function context(self, contextConfig)
   return ctxt
 end
 
-local function request(self)
+local function request(self, request)
   local server = self.config.server
 
   local context = setmetatable({
-    request   = server.getRequest(),
+    request   = request or server.getRequest(),
     response  = server.getResponse(),
     input     = {},
     output    = {}
