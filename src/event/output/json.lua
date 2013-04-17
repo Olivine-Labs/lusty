@@ -24,8 +24,7 @@ return {
       local content = context.request.headers["content-type"]
 
       return (accept and accept:find("application/json")) or
-             (content and content:find("application/json")) or
-             true
+             (content and content:find("application/json"))
     end
   }
 }
