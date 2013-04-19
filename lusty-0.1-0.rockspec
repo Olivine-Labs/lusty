@@ -1,7 +1,7 @@
 package = "lusty"
 version = "0.1-0"
 source = {
-  url = "https://github.com/Olivine-Labs/lusty/v0.1.tar.gz",
+  url = "https://github.com/Olivine-Labs/lusty/archive/v0.1.tar.gz",
   dir = "lusty"
 }
 description = {
