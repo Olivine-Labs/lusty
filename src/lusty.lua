@@ -65,6 +65,7 @@ end
 local function context(self, contextConfig)
 
   local ctxt = {
+    run = {},
     --meta table to load from default context
     __meta = {
       __index = function(context, key)
@@ -84,7 +85,10 @@ local function context(self, contextConfig)
       config = v
     end
 
-    util.inline(path, {context=ctxt, config=config})
+    local result = util.inline(path, {context=ctxt, config=config})
+    if result then
+      ctxt.run[#ctxt.run+1] = result
+    end
   end
 
   ctxt.lusty = self
@@ -101,6 +105,11 @@ local function request(self, request)
     input     = {},
     output    = {}
   }, self.context.__meta)
+
+  --do request context events
+  for i=1, #self.context.run do
+    self.context.run[i](context)
+  end
 
   --Do events, publish with context
   publishers(self, context)
