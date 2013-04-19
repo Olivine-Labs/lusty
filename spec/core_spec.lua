@@ -17,48 +17,24 @@ function tableMerge(t1, t2)
 end
 
 describe("Lusty core test", function()
-  local lusty = require 'init'
+  local lusty = require 'lusty'
 
   local generateConfig = function(overrides)
     overrides = overrides or {}
 
     local config = tableMerge({
-      server = require 'server.stub',
-
       subscribers = {
-        input = {
-          { ['event.input.json'] = { json = require 'dkjson' } }
-        },
-        request = {
-          { ['event.request.file'] = { file = 'handlers.root' } }
-        },
-        output = {
-          { ['event.output.json'] = { json = require 'dkjson' } }
-        },
-        log = {
-          { 'event.log.console' }
-        }
+        request = {}
       },
+      server = require 'dummy.server',
       publishers = {
-        {"input"},
-        {"request"},
-        {"output"}
+        {"request"}
       },
-      context = {
-        ['context.log'] = {},
-        ['context.store'] = {}
-      }
+      context={}
     }, overrides)
 
     return config
   end
-
-    it("Tests instantiation", function()
-    local config = generateConfig()
-    local lusty = lusty(config)
-    local context = lusty:request()
-    assert.are.equal(context.response.status, 200)
-  end)
 
   it("fires different pages", function()
     local config = generateConfig({
@@ -72,7 +48,7 @@ describe("Lusty core test", function()
 
     local lusty = lusty(config)
 
-    local request = require 'server.request'
+    local request = require 'dummy.request'
     request.url = "a"
 
     local context = lusty:request(request)

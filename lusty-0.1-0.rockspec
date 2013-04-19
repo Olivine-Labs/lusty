@@ -14,19 +14,12 @@ description = {
 }
 dependencies = {
   "lua >= 5.1",
-  "lua_cliargs >= 2.0",
-  "dkjson >= 2.1.0",
-  "busted >= 1.6-1"
+  "busted >= 1.7-1"
 }
 build = {
   type = "builtin",
   modules = {
-  },
-  install = {
-    bin = {
-      ["lusty"] = "bin/lusty",
-      ["lusty.bat"] = "bin/lusty.bat",
-      ["lusty_bootstrap"] = "bin/lusty_bootstrap"
-    }
+    ["lusty.init"] = "src/lusty.lua",
+    ["lusty.util"] = "src/util.lua"
   }
 }
