@@ -1,6 +1,6 @@
 --LUSTY
 --An event based modular request router
-local util = require 'util'
+local util = require 'lusty.util'
 
 --loads and registers a subscriber
 local function subscribe(self, channel, name, config)

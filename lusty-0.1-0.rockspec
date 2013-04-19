@@ -19,7 +19,7 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    ["lusty.init"] = "src/lusty.lua",
+    ["lusty.init"] = "src/init.lua",
     ["lusty.util"] = "src/util.lua"
   }
 }
