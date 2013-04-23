@@ -27,7 +27,7 @@ return function()
     self.event:subscribe(channel, subscriber.handler, subscriber.options)
   end
 
- --publish single event
+  --publish single event
   function lusty:publish(channel, context)
     --append url to channel
     for k=1, #context.url do channel[#channel+1] = context.url[k] end
@@ -35,10 +35,10 @@ return function()
   end
 
   function lusty:addContext(name, config)
-      self.context.run[#self.context.run+1] = util.inline(name, {
-        context=context,
-        config=config
-      })
+    self.context.run[#self.context.run+1] = util.inline(name, {
+      context=self.context,
+      config=config
+    })
   end
 
   function lusty:request(request, response)
