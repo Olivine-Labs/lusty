@@ -1,118 +1,72 @@
---LUSTY
---An event based modular request router
 local util = require 'lusty.util'
 
---loads and registers a subscriber
-local function subscribe(self, channel, name, config)
-  local subscriber = util.inline(name, {config=config})
-  self.event:subscribe(channel, subscriber.handler, subscriber.options)
-end
+--LUSTY
+--An event based modular request router
+return function()
 
-local function subscribers(self)
-  for serializedChannel, list in pairs(self.config.subscribers) do
-    local channel = {}
-    string.gsub(serializedChannel, "([^:]+)", function(c) channel[#channel+1] = c end)
-    for subscriber, config in pairs(list) do
-      if type(subscriber) == "number" then
-        subscriber = config
-        config = {}
-      end
-      subscribe(self, channel, subscriber, config)
-    end
-  end
-end
+  local lusty = {
+    event       = require 'mediator'(),
+    publishers  = {}
+  }
 
-local function publish(self, channel, context, urlTable)
-  for k=1, #urlTable do
-    channel[#channel+1] = urlTable[k]
-  end
-
-  self.event:publish(channel, context)
-end
-
---Publish events
-local function publishers(self, context)
-  local urlTable, publishers = {}, self.config.publishers
-
-  --split url at /
-  string.gsub(context.request.url, "([^/]+)", function(c) urlTable[#urlTable+1] = c end)
-
-  for k=1, #publishers do
-    publish(self, {unpack(publishers[k])}, context, urlTable)
-  end
-end
-
---Add data to context
-local function context(self)
-
-  local ctxt = {
+  --global context
+  lusty.context = {
+    lusty = lusty,
     run = {},
-    --meta table to load from default context
+    --meta table to load from global context
     __meta = {
       __index = function(context, key)
-        return rawget(context, key) or self.context[key]
+        return rawget(context, key) or lusty.context[key]
       end
     }
   }
 
-  for k, v in pairs(self.config.context) do
-    local path, config
-
-    if type(k) == "number" then
-      path = v
-      config = {}
-    else
-      path = k
-      config = v
-    end
-
-    local result = util.inline(path, {context=ctxt, config=config})
-    if result then
-      ctxt.run[#ctxt.run+1] = result
-    end
+  --loads and registers a subscriber
+  function lusty:subscribe(channel, name, config)
+    local subscriber = util.inline(name, {config=config})
+    self.event:subscribe(channel, subscriber.handler, subscriber.options)
   end
 
-  ctxt.lusty = self
-
-  self.context = ctxt
-end
-
-local function request(self, request)
-  local server = self.config.server
-
-  local context = setmetatable({
-    request   = request or server.getRequest(),
-    response  = server.getResponse(),
-    input     = {},
-    output    = {}
-  }, self.context.__meta)
-
-  --do request context events
-  for i=1, #self.context.run do
-    self.context.run[i](context)
+ --publish single event
+  function lusty:publish(channel, context)
+    --append url to channel
+    for k=1, #context.url do channel[#channel+1] = context.url[k] end
+    self.event:publish(channel, context)
   end
 
-  --Do events, publish with context
-  publishers(self, context)
+  function lusty:addContext(name, config)
+      self.context.run[#self.context.run+1] = util.inline(path, {
+        context=context,
+        config=config
+      })
+  end
 
-  --finally, return the context
-  return context
-end
+  function lusty:request(request, response)
 
---instantiate a lusty request handler
-local function init(config)
+    local context = setmetatable({
+      url       = {},
+      request   = request,
+      response  = response,
+      input     = {},
+      output    = {}
+    }, self.context.__meta)
 
-  local lusty = {
-    config            = config,
-    event             = require 'mediator'(),
-    request           = request,
-  }
+    --split url at /
+    string.gsub(request.url, "([^/]+)", function(c) context.url[#context.url+1] = c end)
 
-  context(lusty)
+    --do request context events
+    for i=1, #self.context.run do
+      self.context.run[i](context)
+    end
 
-  subscribers(lusty)
+    --do publishers
+    for k=1, #self.publishers do
+      self:publish({unpack(self.publishers[k])}, context)
+    end
+
+    --finally, return the context
+    return context
+  end
 
   return lusty
 end
-
-return init
