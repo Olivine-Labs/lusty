@@ -8,35 +8,12 @@ local function subscribe(self, channel, name, config)
   self.event:subscribe(channel, subscriber.handler, subscriber.options)
 end
 
-local function subscribers(self, list, channel)
-  if not channel then channel = {} end
-
-  for k, v in pairs(list or self.config.subscribers) do
-    local newChannel = channel
-    local vt, kt = type(v), type(k)
-
-    if kt == "number" and vt == "table" then
-      for k2, v2 in pairs(v) do
-        local name, config
-        if type(k2) == "number" then
-          name=v2
-        else
-          name=k2
-          config=v2
-        end
-        subscribe(self, newChannel, name, config)
-      end
-    else
-      if kt == "string" then
-        newChannel = {unpack(channel)}
-        newChannel[#newChannel+1]=k
-      end
-
-      if vt == "string" then
-        subscribe(self, newChannel, v)
-      elseif vt == "table" then
-        subscribers(self, v, newChannel)
-      end
+local function subscribers(self)
+  for serializedChannel, list in pairs(self.config.subscribers) do
+    local channel = {}
+    string.gsub(serializedChannel, "([^:]+)", function(c) channel[#channel+1] = c end)
+    for subscriber, config in pairs(list) do
+      subscribe(self, channel, subscriber, config)
     end
   end
 end
@@ -62,7 +39,7 @@ local function publishers(self, context)
 end
 
 --Add data to context
-local function context(self, contextConfig)
+local function context(self)
 
   local ctxt = {
     run = {},
@@ -74,7 +51,7 @@ local function context(self, contextConfig)
     }
   }
 
-  for k, v in pairs(contextConfig) do
+  for k, v in pairs(self.config.context) do
     local path, config
 
     if type(k) == "number" then
@@ -93,7 +70,7 @@ local function context(self, contextConfig)
 
   ctxt.lusty = self
 
-  return ctxt
+  self.context = ctxt
 end
 
 local function request(self, request)
@@ -127,7 +104,8 @@ local function init(config)
     request           = request,
   }
 
-  lusty.context = context(lusty, config.context)
+  context(lusty)
+
   subscribers(lusty)
 
   return lusty
