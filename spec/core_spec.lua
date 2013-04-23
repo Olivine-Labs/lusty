@@ -1,7 +1,7 @@
 package.path = './spec/?.lua;../src/?.lua;'..package.path
 
 describe("Lusty core test", function()
-  local lusty = require 'lusty'
+  local lusty = require 'init'
 
   it("fires different pages", function()
     local config = {
@@ -9,7 +9,7 @@ describe("Lusty core test", function()
       server = require 'dummy.server',
       subscribers = {
         ['request:a'] = {
-          ['dummy.test-handler-a'] = {}
+          'dummy.test-handler-a'
         },
         ['request:b'] = {
           ['dummy.test-handler-b'] = {}
