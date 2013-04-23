@@ -1,8 +1,8 @@
 package = "lusty"
-version = "0.1-4"
+version = "0.2-0"
 source = {
-  url = "https://github.com/Olivine-Labs/lusty/archive/v0.1.tar.gz",
-  dir = "lusty-0.1"
+  url = "https://github.com/Olivine-Labs/lusty/archive/v0.2.tar.gz",
+  dir = "lusty-0.2"
 }
 description = {
   summary = "Lua web framework.",
