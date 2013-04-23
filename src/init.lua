@@ -35,7 +35,7 @@ return function()
   end
 
   function lusty:addContext(name, config)
-      self.context.run[#self.context.run+1] = util.inline(path, {
+      self.context.run[#self.context.run+1] = util.inline(name, {
         context=context,
         config=config
       })
