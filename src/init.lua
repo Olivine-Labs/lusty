@@ -23,7 +23,7 @@ return function()
 
   --loads and registers a subscriber
   function lusty:subscribe(channel, name, config)
-    local subscriber = util.inline(name, {config=config})
+    local subscriber = util.inline(name, {channel = channel, config=config})
     self.event:subscribe(channel, subscriber.handler, subscriber.options)
   end
 
