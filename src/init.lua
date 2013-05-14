@@ -30,7 +30,9 @@ return function()
   --publish single event
   function lusty:publish(channel, context)
     --append url to channel
-    for k=1, #context.url do channel[#channel+1] = context.url[k] end
+    if context.url then
+      for k=1, #context.url do channel[#channel+1] = context.url[k] end
+    end
     self.event:publish(channel, context)
   end
 
