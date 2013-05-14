@@ -33,7 +33,7 @@ return function()
     if context.url then
       for k=1, #context.url do channel[#channel+1] = context.url[k] end
     end
-    self.event:publish(channel, context)
+    return self.event:publish(channel, context)
   end
 
   function lusty:addContext(name, config)

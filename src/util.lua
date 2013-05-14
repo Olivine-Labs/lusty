@@ -16,7 +16,7 @@ local function inline(name, env)
   if type(file) == 'string' then
     error(file)
   end
-  return setfenv(file, setmetatable(env, inlineMeta))()
+  return setfenv(file, setmetatable(env, inlineMeta))(name)
 end
 
 return {
