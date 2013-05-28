@@ -62,8 +62,18 @@ return function()
     end
 
     --do publishers
-    for k=1, #self.publishers do
-      self:publish({unpack(self.publishers[k])}, context)
+    local ok, err = pcall(function()
+      for k=1, #self.publishers do
+        self:publish({unpack(self.publishers[k])}, context)
+      end
+    end)
+
+    if not ok then
+      context.request.url = "/500/"
+      context.err=err
+      for k=1, #self.publishers do
+        self:publish({unpack(self.publishers[k])}, context)
+      end
     end
 
     --finally, return the context
