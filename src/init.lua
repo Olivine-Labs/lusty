@@ -61,16 +61,20 @@ return function()
       self.context.run[i](context)
     end
 
+    local stackTrace = ""
+
     --do publishers
-    local ok, err = pcall(function()
+    local ok, err = xpcall(function()
       for k=1, #self.publishers do
         self:publish({unpack(self.publishers[k])}, context)
       end
-    end)
+    end, function(message) stackTrace = debug.traceback("", 2) return message end)
 
+    --if error, rewrite request to error page
     if not ok then
       context.request.url = "/500/"
       context.err=err
+      context.trace = stackTrace
       for k=1, #self.publishers do
         self:publish({unpack(self.publishers[k])}, context)
       end
