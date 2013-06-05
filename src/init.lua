@@ -29,9 +29,9 @@ return function()
 
   --publish single event
   function lusty:publish(channel, context)
-    --append url to channel
-    if context.url then
-      for k=1, #context.url do channel[#channel+1] = context.url[k] end
+    --append suffix to channel if exists
+    if context.suffix then
+      for k=1, #context.suffix do channel[#channel+1] = context.suffix[k] end
     end
     return self.event:publish(channel, context)
   end
@@ -43,39 +43,33 @@ return function()
     })
   end
 
-  function lusty:request(request, response)
-
-    local context = setmetatable({
-      url       = {},
-      request   = request,
-      response  = response,
-      input     = {},
-      output    = {}
-    }, self.context.__meta)
-
-    --split url at /
-    string.gsub(request.url, "([^/]+)", function(c) context.url[#context.url+1] = c end)
+  function lusty:request(context)
 
     --do request context events
     for i=1, #self.context.run do
       self.context.run[i](context)
     end
 
-    local stackTrace = ""
+    local stackTrace = nil
 
-    --do publishers
+    --do publishers, set up error reporting
     local ok, err = xpcall(function()
       for k=1, #self.publishers do
+        --quick copy publishers using unpack
         self:publish({unpack(self.publishers[k])}, context)
       end
     end, function(message) stackTrace = debug.traceback("", 2) return message end)
 
     --if error, rewrite request to error page
     if not ok then
-      context.request.url = "/500/"
-      context.err=err
-      context.trace = stackTrace
+
+      context.suffix  = {"500"}
+      context.err     = err
+      context.trace   = stackTrace
+
       for k=1, #self.publishers do
+
+        --quick copy publishers using unpack
         self:publish({unpack(self.publishers[k])}, context)
       end
     end
