@@ -50,28 +50,25 @@ return function()
       self.context.run[i](context)
     end
 
-    local stackTrace = nil
+    --do publishers, handle errors
+    for k=1, #self.publishers do
 
-    --do publishers, set up error reporting
-    local ok, err = xpcall(function()
-      for k=1, #self.publishers do
+      xpcall(function()
         --quick copy publishers using unpack
         self:publish({unpack(self.publishers[k])}, context)
-      end
-    end, function(message) stackTrace = debug.traceback("", 2) return message end)
+      end,
+      --error handler
+      function(message)
 
-    --if error, rewrite request to error page
-    if not ok then
+        if not context.error then context.error = {} end
 
-      context.suffix  = {"500"}
-      context.err     = err
-      context.trace   = stackTrace
+        context.error[#context.error + 1] = {
+          trace = debug.traceback("", 2),
+          message = message
+        }
 
-      for k=1, #self.publishers do
+      end)
 
-        --quick copy publishers using unpack
-        self:publish({unpack(self.publishers[k])}, context)
-      end
     end
 
     --finally, return the context
