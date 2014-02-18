@@ -23,7 +23,7 @@ development server and bootstrap applications. `luarocks install lusty\_admin`
 will get you started. You can then call `lusty\_admin init` and `lusty\_admin
 server` to bootstrap and fire up OpenResty for testing. `lusty\_admin bootstrap`
 will set you up with a very basic listy installation. *Bootstrap assumes OpenResty,
-lua, luarocks, mongodb, and git are isntalled.*
+lua, luarocks, mongodb, and git are installed.*
 
 ## Usage
 
