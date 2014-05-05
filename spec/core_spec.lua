@@ -9,14 +9,12 @@ describe("Lusty core test", function()
 
     local request = require 'dummy.request'
     local response = require 'dummy.response'
-    request.url = "a"
 
-    local context = lusty:request(request, response)
+    local context = lusty:request({request = request, suffix = {'a'}, response = response})
     assert.are.equal("a", context.output)
 
-    request.url = "b"
 
-    local context = lusty:request(request, response)
+    local context = lusty:request({request = request, suffix = {'b'}, response = response})
     assert.are.equal("b", context.output)
   end)
 end)

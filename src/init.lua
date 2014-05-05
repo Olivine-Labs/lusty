@@ -23,7 +23,7 @@ return function()
 
   --loads and registers a subscriber
   function lusty:subscribe(channel, name, config)
-    local subscriber = util.inline(name, {channel = channel, config=config})
+    local subscriber = util.inline(name, channel, config)
     self.event:subscribe(channel, subscriber.handler, subscriber.options)
   end
 
@@ -37,10 +37,7 @@ return function()
   end
 
   function lusty:addContext(name, config)
-    self.context.run[#self.context.run+1] = util.inline(name, {
-      context=self.context,
-      config=config
-    })
+    self.context.run[#self.context.run+1] = util.inline(name, nil, config, self.context)
   end
 
   function lusty:request(context)

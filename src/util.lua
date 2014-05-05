@@ -1,23 +1,25 @@
-local loader, loaded = package.loaders[2], package.loaded
-
-local inlineMeta = {
-  __index = function(self, key)
-    return rawget(self, key) or _G[key]
-  end
-}
+local loaded = package.loaded
 
 --load file, memoize, execute loaded function inside environment
-local function inline(name, env)
+local function inline(name, channel, config, context)
   local file = loaded[name]
   if not file then
-    file = string.dump(loader(name))
+      local err
+      for _, v in pairs(package.loaders) do
+        file, err = v(name)
+        if type(file) == "function" then break end
+      end
+      if file == nil then
+        error(err)
+      end
+      if type(file) ~= "function" then
+        error(file)
+      end
+
     loaded[name] = file
   end
-  file = loadstring(file)
-  if type(file) == 'string' then
-    error(file)
-  end
-  return setfenv(file, setmetatable(env, inlineMeta))(name)
+
+  return file(name, channel, config, context)
 end
 
 return {
