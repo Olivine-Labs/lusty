@@ -10,9 +10,10 @@ local inlineMeta = {
 local function inline(name, env)
   local file = loaded[name]
   if not file then
-    file = loader(name)
+    file = string.dump(loader(name))
     loaded[name] = file
   end
+  file = loadstring(file)
   if type(file) == 'string' then
     error(file)
   end
