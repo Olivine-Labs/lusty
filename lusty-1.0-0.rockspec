@@ -1,8 +1,8 @@
 package = "lusty"
-version = "0.4-0"
+version = "1.0-0"
 source = {
-  url = "https://github.com/Olivine-Labs/lusty/archive/v0.4.tar.gz",
-  dir = "lusty-0.4"
+  url = "https://github.com/Olivine-Labs/lusty/archive/v1.0.tar.gz",
+  dir = "lusty-1.0"
 }
 description = {
   summary = "Lua web framework.",
@@ -14,7 +14,7 @@ description = {
 }
 dependencies = {
   "lua >= 5.1",
-  "busted >= 1.7-1",
+  "busted >= 1.10-0",
   "mediator_lua >= 1.1-2"
 }
 build = {
