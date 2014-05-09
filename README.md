@@ -31,7 +31,7 @@ Channels control everything. Data persistance, for example, is handled through
 a series of pub / sub calls:
 
 ```lua
-# data.persistence.user.config - set up channels to listen to
+-- data.persistence.user.config - set up channels to listen to
 
 {
   events = {
@@ -41,24 +41,24 @@ a series of pub / sub calls:
   }
 }
 
-# data.persistence.user.lua
+-- data.persistence.user.lua
 local get_user = function(lusty, parameters, callback)
   local user = {}
-  # get user from mongodb, or mysql, or redis, or wherever
-  # return the user (added to results sent back) and "true", which tells lusty
-  # to continue on to the next event, if it needs to
+  -- get user from mongodb, or mysql, or redis, or wherever
+  -- return the user (added to results sent back) and "true", which tells lusty
+  -- to continue on to the next event, if it needs to
   return user, true
 end
 
 local save_user = function(lusty, user, callback)
   local user = {}
-  # save user to your data store
+  -- save user to your data store
   return user, true
 end
 
 local delete_user = function(lusty, id, callback)
   local user = {}
-  # save user from your data store
+  -- save user from your data store
   return user, true
 end
 ```
