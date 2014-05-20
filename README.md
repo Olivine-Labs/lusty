@@ -12,7 +12,7 @@ data to other modules via channels.
 ## Installation
 
 Install with luarocks: `luarocks install lusty`
-Lusty has a depdendency on mediator\_lua, also avaiable through luarocks.
+Lusty has a depdendency on mediator\_lua, also available through luarocks.
 `luarocks install mediator\_lua`.
 
 [OpenResty](http://www.openresty.com) is nginx + lua, and is the currently
