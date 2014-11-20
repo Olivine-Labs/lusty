@@ -30,7 +30,7 @@ local function inline(name, env)
 
     if #keys > 0 then
       file, err = loadstring(
-        'local _env=select(1, ...)\nlocal '..table.concat(keys, ',')..
+        'local _env=select(2, ...)\nlocal '..table.concat(keys, ',')..
         "=_env."..table.concat(keys, ",_env.")..
         '\n'..code
       )
@@ -40,7 +40,7 @@ local function inline(name, env)
     if not file then error(err) end
     loaded[name] = file
   end
-  return file(env)
+  return file(name, env)
 end
 
 local function clearCache()

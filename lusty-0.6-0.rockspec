@@ -1,8 +1,8 @@
 package = "lusty"
-version = "0.5-0"
+version = "0.6-0"
 source = {
-  url = "https://github.com/Olivine-Labs/lusty/archive/v0.5.tar.gz",
-  dir = "lusty-0.5"
+  url = "https://github.com/Olivine-Labs/lusty/archive/v0.6.tar.gz",
+  dir = "lusty-0.6"
 }
 description = {
   summary = "Lua web framework.",
@@ -20,7 +20,7 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    ["lusty.init"] = "src/init.lua",
-    ["lusty.util"] = "src/util.lua"
+    ["lusty.init"] = "lusty/init.lua",
+    ["lusty.util"] = "lusty/util.lua"
   }
 }

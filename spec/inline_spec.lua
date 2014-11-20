@@ -1,7 +1,5 @@
-package.path = 'src/?.lua;'..package.path
-
 describe('verify that inline handles environments properly', function()
-  local util = require 'util'
+  local util = require 'lusty.util'
 
   after_each(function()
     util.clearCache()
