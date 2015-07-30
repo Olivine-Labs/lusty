@@ -55,7 +55,7 @@ local function inline(name, env)
   end
   local res = {xpcall(function() return file(name, env) end, function(m) return rewriteError(m, fileNames[name]) end)}
   if res[1] then
-    return select(1, unpack(res))
+    return select(2, unpack(res))
   else
     error(res[2])
   end
