@@ -18,13 +18,19 @@ local function loadModule(name)
 end
 
 local function rewriteError(message, fileName)
-  if type(message) == 'string' then
-    local _, _, lineNumber = message:find(':(%d):')
-    lineNumber = lineNumber - 2
-    return message:gsub('%[.*%]', fileName):gsub(':%d:', ':'..lineNumber..':')
-  else
+  local ok, err = pcall(function()
+    if type(message) == 'string' then
+      local _, _, lineNumber = message:find(':(%d):')
+      lineNumber = lineNumber - 2
+      if lineNumber > 0 then
+        if message:find('%[.*%]') then
+          return message:gsub('%[.*%]', fileName):gsub(':%d:', ':'..lineNumber..':')
+        end
+      end
+    end
     return message
-  end
+  end)
+  return err
 end
 
 --load file, memoize, execute loaded function inside environment
