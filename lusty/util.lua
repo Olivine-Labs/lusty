@@ -21,7 +21,7 @@ local function rewriteError(message, fileName)
   local ok, err = pcall(function()
     if type(message) == 'string' then
       local _, _, lineNumber = message:find(':(%d):')
-      if tonumber(lineNumber) and lineNumber > 0 then
+      if tonumber(lineNumber) and tonumber(lineNumber) > 0 then
         lineNumber = lineNumber - 2
         if message:find('%[.*%]') then
           return message:gsub('%[.*%]', fileName):gsub(':%d:', ':'..lineNumber..':')
