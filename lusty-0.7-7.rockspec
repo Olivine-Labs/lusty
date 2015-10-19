@@ -1,5 +1,5 @@
 package = "lusty"
-version = "0.7-6"
+version = "0.7-7"
 source = {
   url = "https://github.com/Olivine-Labs/lusty/archive/v0.7.tar.gz",
   dir = "lusty-0.7"
