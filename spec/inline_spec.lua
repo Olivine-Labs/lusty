@@ -1,3 +1,4 @@
+package.path = './?.lua;'..package.path
 describe('verify that inline handles environments properly', function()
   local util = require 'lusty.util'
 

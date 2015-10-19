@@ -1,4 +1,5 @@
 local loaded = {}
+local chunks = {}
 local fileNames = {}
 
 local function loadModule(name)
@@ -17,21 +18,16 @@ local function loadModule(name)
   return nil, table.concat(errors)
 end
 
-local function rewriteError(message, fileName)
-  local ok, err = pcall(function()
-    if type(message) == 'string' then
-      if message:find('%[string .*%]') then
-        message = message:gsub('%[string .*%]', fileName)
-        local _, _, lineNumber = message:find(':(%d):')
-        if tonumber(lineNumber) and tonumber(lineNumber) > 0 then
-          lineNumber = lineNumber - 1
-          message = message:gsub(':%d:', ':'..lineNumber..':')
-        end
+local function rewriteLineNumber(message, lineMod)
+  if type(message) == 'string' then
+    if lineMod ~= 0 then
+      local _, _, lineNumber = message:find(':(%d):')
+      if tonumber(lineNumber) and tonumber(lineNumber) > 0 then
+        message = message:gsub(':'..lineNumber..':', ':'..(lineNumber+lineMod)..':')
       end
     end
-    return message
-  end)
-  return err
+  end
+  return message
 end
 
 --load file, memoize, execute loaded function inside environment
@@ -48,29 +44,43 @@ local function inline(name, env)
     lineMod = -1
   end
 
-  local file = loaded[name..'/'..table.concat(keys, '/')]
+  local namespace = loaded[name]
+  local file, signature = nil, table.concat(keys, '/')
+  if namespace then
+    file = namespace[signature]
+  end
   if not file then
     local fileName = nil
-    local code, err = loadModule(name)
+    local code = chunks[name]
+    local err
     if not code then
-      error(err)
+      code, err = loadModule(name)
+      if not code then
+        error(err)
+      end
+      chunks[name] = code
     end
     if #keys > 0 then
       file, err = loadstring(
-        'local '..table.concat(keys, ',')..'=select(2, ...)\n'..code
+        'local '..table.concat(keys, ',')..'=select(2, ...)\n'..code,
+        fileNames[name]
       )
     else
-      file, err = loadstring(code)
+      file, err = loadstring(code, fileNames[name])
     end
-    if not file then error(rewriteError(err, fileNames[name], lineMod)) end
-    loaded[name..'/'..table.concat(keys, '/')] = file
+    if not file then error(rewriteLineNumber(err, lineMod)) end
+    if not namespace then
+      namespace = {}
+      loaded[name] = namespace
+    end
+    loaded[name][signature] = file
   end
 
   local res = {
     xpcall(function()
       return file(name, unpack(values, 1, n))
     end, function(m)
-      return rewriteError(m, fileNames[name], lineMod)
+      return rewriteLineNumber(m, lineMod)
     end)
   }
 
