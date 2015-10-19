@@ -37,9 +37,11 @@ end
 local function inline(name, env)
   local keys ={}
   local values = {}
+  local n = 1
   for k, v in pairs(env) do
-    keys[#keys+1] = k
-    values[#values+1] = v
+    keys[n] = k
+    values[n] = v
+    n = n + 1
   end
   local file = loaded[name]
   if not file then
@@ -58,9 +60,10 @@ local function inline(name, env)
     if not file then error(rewriteError(err, fileNames[name])) end
     loaded[name] = file
   end
-  local res = {xpcall(function() return file(name, unpack(values)) end, function(m) return rewriteError(m, fileNames[name]) end)}
+  local res = {xpcall(function() return file(name, unpack(values, 1, n)) end, function(m) return rewriteError(m, fileNames[name]) end)}
   if res[1] then
-    return select(2, unpack(res))
+    local maxn = table.maxn(res)
+    return unpack(res, 2, maxn)
   else
     error(res[2])
   end
