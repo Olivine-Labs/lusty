@@ -48,7 +48,7 @@ local function inline(name, env)
     lineMod = -1
   end
 
-  local file = loaded[name]
+  local file = loaded[name..'/'..table.concat(keys, '/')]
   if not file then
     local fileName = nil
     local code, err = loadModule(name)
@@ -63,7 +63,7 @@ local function inline(name, env)
       file, err = loadstring(code)
     end
     if not file then error(rewriteError(err, fileNames[name], lineMod)) end
-    loaded[name] = file
+    loaded[name..'/'..table.concat(keys, '/')] = file
   end
 
   local res = {
