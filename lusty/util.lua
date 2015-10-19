@@ -20,11 +20,12 @@ end
 local function rewriteError(message, fileName)
   local ok, err = pcall(function()
     if type(message) == 'string' then
-      local _, _, lineNumber = message:find(':(%d):')
-      if tonumber(lineNumber) and tonumber(lineNumber) > 0 then
-        lineNumber = lineNumber - 1
-        if message:find('%[string .*%]') then
-          return message:gsub('%[.*%]', fileName):gsub(':%d:', ':'..lineNumber..':')
+      if message:find('%[string .*%]') then
+        message = message:gsub('%[string .*%]', fileName)
+        local _, _, lineNumber = message:find(':(%d):')
+        if tonumber(lineNumber) and tonumber(lineNumber) > 0 then
+          lineNumber = lineNumber - 1
+          message = message:gsub(':%d:', ':'..lineNumber..':')
         end
       end
     end
@@ -35,14 +36,18 @@ end
 
 --load file, memoize, execute loaded function inside environment
 local function inline(name, env)
-  local keys ={}
-  local values = {}
+  local keys, values = {}, {}
   local n = 1
   for k, v in pairs(env) do
     keys[n] = k
     values[n] = v
     n = n + 1
   end
+  local lineMod = 0
+  if n > 1 then
+    lineMod = -1
+  end
+
   local file = loaded[name]
   if not file then
     local fileName = nil
@@ -57,13 +62,20 @@ local function inline(name, env)
     else
       file, err = loadstring(code)
     end
-    if not file then error(rewriteError(err, fileNames[name])) end
+    if not file then error(rewriteError(err, fileNames[name], lineMod)) end
     loaded[name] = file
   end
-  local res = {xpcall(function() return file(name, unpack(values, 1, n)) end, function(m) return rewriteError(m, fileNames[name]) end)}
+
+  local res = {
+    xpcall(function()
+      return file(name, unpack(values, 1, n))
+    end, function(m)
+      return rewriteError(m, fileNames[name], lineMod)
+    end)
+  }
+
   if res[1] then
-    local maxn = table.maxn(res)
-    return unpack(res, 2, maxn)
+    return unpack(res, 2, table.maxn(res))
   else
     error(res[2])
   end
