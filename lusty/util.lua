@@ -22,8 +22,8 @@ local function rewriteError(message, fileName)
     if type(message) == 'string' then
       local _, _, lineNumber = message:find(':(%d):')
       if tonumber(lineNumber) and tonumber(lineNumber) > 0 then
-        lineNumber = lineNumber - 2
-        if message:find('%[.*%]') then
+        lineNumber = lineNumber - 1
+        if message:find('%[string .*%]') then
           return message:gsub('%[.*%]', fileName):gsub(':%d:', ':'..lineNumber..':')
         end
       end
@@ -35,6 +35,12 @@ end
 
 --load file, memoize, execute loaded function inside environment
 local function inline(name, env)
+  local keys ={}
+  local values = {}
+  for k, v in pairs(env) do
+    keys[#keys+1] = k
+    values[#values+1] = v
+  end
   local file = loaded[name]
   if not file then
     local fileName = nil
@@ -42,16 +48,9 @@ local function inline(name, env)
     if not code then
       error(err)
     end
-    local keys ={}
-    for k in pairs(env) do
-      keys[#keys+1] = k
-    end
-
     if #keys > 0 then
       file, err = loadstring(
-        'local _env=select(2, ...)\nlocal '..table.concat(keys, ',')..
-        "=_env."..table.concat(keys, ",_env.")..
-        '\n'..code
+        'local '..table.concat(keys, ',')..'=select(2, ...)\n'..code
       )
     else
       file, err = loadstring(code)
@@ -59,7 +58,7 @@ local function inline(name, env)
     if not file then error(rewriteError(err, fileNames[name])) end
     loaded[name] = file
   end
-  local res = {xpcall(function() return file(name, env) end, function(m) return rewriteError(m, fileNames[name]) end)}
+  local res = {xpcall(function() return file(name, unpack(values)) end, function(m) return rewriteError(m, fileNames[name]) end)}
   if res[1] then
     return select(2, unpack(res))
   else

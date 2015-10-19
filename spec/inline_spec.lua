@@ -17,6 +17,6 @@ describe('verify that inline handles environments properly', function()
 
   it('can set an environment with no variables', function()
     local env = {}
-    assert.equal(nil, util.inline('spec.dummy.inlineFunction', env))
+    assert.same({}, {util.inline('spec.dummy.inlineFunction', env)})
   end)
 end)
